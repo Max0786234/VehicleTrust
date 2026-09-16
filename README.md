@@ -1,14 +1,8 @@
-# Vehicle Intelligence: Distributed Information Integration for Vehicle Compliance
+# VehicleTrust
 
-This project is designed to match the course assignment context: a distributed information integration system that performs schema matching and entity resolution across heterogeneous vehicle registration, insurance, theft, and incident databases to create a unified vehicle information model for cross-source querying and compliance verification.
+VehicleTrust is a distributed information integration system designed to improve vehicle compliance checks by combining data from multiple independent sources into one trusted view.
 
-This repository implements a runnable prototype for that scenario: it ingests multiple source datasets, reconciles the same vehicle across inconsistent schemas, and produces auditable decisions such as clear, uninsured, stolen, or registration review outcomes.
-
-## Course assignment context
-
-The project is framed as a group-based system-building task in which students must design and implement a data integration system using a modern AI-assisted workflow. The prototype here reflects the assignment objective of integrating diverse data sources into a single decision-support system for vehicle compliance.
-
-The key challenge is not only collecting data, but also aligning heterogeneous schemas and identity keys from different systems (for example, plate numbers and vehicle identifiers that are stored under different names and formatting conventions) before making trustworthy decisions.
+The aim of this project is to match vehicle records across heterogeneous databases, resolve identity differences, and provide auditable decisions for roadside inspection and compliance verification.
 
 ## Source systems
 
