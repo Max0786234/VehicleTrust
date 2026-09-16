@@ -1,0 +1,3 @@
+source_databases/
+__pycache__/
+*.py[cod]
