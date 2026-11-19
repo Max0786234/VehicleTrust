@@ -1,4 +1,4 @@
-SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrust coursework data. Not a real record.
 
 # Transfer of Ownership Acknowledgement (Form 29/30)
 

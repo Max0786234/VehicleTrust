@@ -1,8 +1,8 @@
-# VehicleTrust AI: Code Modifications & Verification Log
+# VehicleTrust: Code Modifications & Verification Log
 
 ## 1. Master Prompt Reference
 The project was designed, generated, and iteratively refined based on the Master Prompt:
-`VehicleTrust AI — Distributed Vehicle Insurance Verification`, targeting:
+`VehicleTrust — Distributed Vehicle Insurance Verification`, targeting:
 - Four independent FastAPI database services (`vehicle_registry.db`, `insurance_records.db`, `registration_authority.db`, `theft_scrapping.db`)
 - Multi-laptop LAN deployment support with configurable endpoints
 - Streamlit web frontend covering all features
@@ -121,7 +121,7 @@ The test suite was executed using `pytest` inside the project environment:
 $ pytest tests/ -v
 ============================= test session starts ==============================
 platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0
-rootdir: /home/ricky16x/projects/iia/VehicleTrustAI
+rootdir: /home/ricky16x/projects/iia/VehicleTrust
 configfile: pytest.ini
 
 tests/test_integration.py::test_schema_mapper PASSED                     [  3%]

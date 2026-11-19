@@ -13,7 +13,7 @@ import os
 import textwrap
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-BANNER = "SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record."
+BANNER = "SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrust coursework data. Not a real record."
 
 
 def doc(doc_id, folder, fmt, title, doc_type, date, issuer, plate_display, fields, body):
@@ -249,7 +249,7 @@ def write_pdf(path: str, text: str, title: str, subject: str) -> None:
         objects.append(f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents {content_id} 0 R >>")
         page_ids.append(len(objects))
     objects[kids_placeholder] = f"<< /Type /Pages /Kids [{' '.join(f'{i} 0 R' for i in page_ids)}] /Count {len(page_ids)} >>"
-    objects.append(f"<< /Title ({_pdf_escape(title)}) /Subject ({_pdf_escape(subject)}) /Producer (VehicleTrustAI synthetic generator) >>")
+    objects.append(f"<< /Title ({_pdf_escape(title)}) /Subject ({_pdf_escape(subject)}) /Producer (VehicleTrust synthetic generator) >>")
     info_id = len(objects)
 
     out = bytearray(b"%PDF-1.4\n")

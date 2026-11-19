@@ -1,4 +1,4 @@
-"""VehicleTrustAI multi-machine launcher.
+"""VehicleTrust multi-machine launcher.
 
 Two-laptop 2+3 deployment
   Laptop 1:  python start_node.py machine-1   -> Theft (8104), Audit (8105), Gateway (8000), Streamlit (8501)
@@ -47,7 +47,7 @@ PACKAGE_EXCLUDE_EXT = {".db", ".db-journal", ".pyc", ".log", ".zip"}
 
 def banner(text: str) -> None:
     print("=" * 74)
-    print(f"VehicleTrust AI - {text}")
+    print(f"VehicleTrust - {text}")
     print("=" * 74)
 
 
@@ -104,7 +104,7 @@ def ensure_ports_free(ports, host: str) -> None:
     busy = [p for p in ports if not port_free(p, host)]
     if busy:
         print(f"[Error] Port(s) already in use: {', '.join(map(str, busy))}")
-        print("        Another VehicleTrustAI instance (or another program) is running.")
+        print("        Another VehicleTrust instance (or another program) is running.")
         print("        Find it:  netstat -ano | findstr :<port>      Stop it:  taskkill /PID <pid> /F")
         sys.exit(1)
 
@@ -267,7 +267,7 @@ def check_services() -> int:
 
 def env_text(group: str, machine2_ip: str = "", machine1_ip: str = "") -> str:
     stamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    lines = [f"# VehicleTrustAI environment for {group} (generated {stamp} by start_node.py)", ""]
+    lines = [f"# VehicleTrust environment for {group} (generated {stamp} by start_node.py)", ""]
     if group == "machine-1":
         ip = machine2_ip or "LAPTOP2_IP"
         lines += ["# Laptop 1: Theft (8104), Audit (8105), Gateway (8000), Streamlit (8501) run HERE.",
@@ -319,7 +319,7 @@ def package(group: str, out_dir: str, with_data: bool, machine2_ip: str) -> str:
         print("[Error] package expects machine-1, machine-2 or all")
         sys.exit(1)
     dest_root = os.path.abspath(out_dir or os.path.join(BASE_DIR, "dist"))
-    dest = os.path.join(dest_root, f"VehicleTrustAI-{group}")
+    dest = os.path.join(dest_root, f"VehicleTrust-{group}")
     if os.path.exists(dest):
         shutil.rmtree(dest)
     for dirpath, dirnames, filenames in os.walk(BASE_DIR):
@@ -345,7 +345,7 @@ def package(group: str, out_dir: str, with_data: bool, machine2_ip: str) -> str:
         fh.write(env_text(group, machine2_ip))
     nodes = MACHINE_GROUPS[group]
     with open(os.path.join(dest, "DEPLOYMENT_ROLE.txt"), "w", encoding="utf-8") as fh:
-        fh.write(f"VehicleTrustAI deployment copy for {group}\nServices: {', '.join(nodes)}\n"
+        fh.write(f"VehicleTrust deployment copy for {group}\nServices: {', '.join(nodes)}\n"
                  f"Database files included: {', '.join(copied_dbs) or 'none (created from seed data on first start)'}\n\n"
                  f"1. python -m pip install -r requirements.txt\n2. python start_node.py init {group}\n"
                  f"3. python start_node.py {group}\nSee docs/DISTRIBUTED_SETUP.md\n")
@@ -363,7 +363,7 @@ def main() -> None:
     except (AttributeError, ValueError):
         pass
     start_targets = sorted(set(MACHINE_GROUPS) | set(NODE_CONFIG) | {"frontend"})
-    parser = argparse.ArgumentParser(description="VehicleTrust AI multi-machine launcher",
+    parser = argparse.ArgumentParser(description="VehicleTrust multi-machine launcher",
                                      formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
     parser.add_argument("command", choices=start_targets + ["init", "check", "configure", "package"])
     parser.add_argument("group", nargs="?", help="machine group for init / configure / package")

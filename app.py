@@ -30,7 +30,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 import config  # noqa: E402
 import ui_phase3  # noqa: E402
 
-st.set_page_config(page_title="VehicleTrust AI — Insurance Verification", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="VehicleTrust — Insurance Verification", page_icon="🛡️", layout="wide")
 
 DEFAULT_URLS = {key: config.service_url(key) for key in config.DATA_SERVICE_KEYS}
 DEFAULT_AUDIT_URL = config.service_url("audit_log")
@@ -73,7 +73,7 @@ def fetch_service_records(service_key: str, base_url: str):
         return False, []
 
 
-st.sidebar.title("🛡️ VehicleTrust AI")
+st.sidebar.title("🛡️ VehicleTrust")
 st.sidebar.caption("Distributed Vehicle Insurance Verification System")
 st.sidebar.markdown("---")
 

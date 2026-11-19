@@ -34,7 +34,7 @@ from integration import (
     get_cleansing_audit_logs,
 )
 
-app = FastAPI(title="VehicleTrust AI — HTTP/JSON API Gateway & Web Frontend", version="1.0.0")
+app = FastAPI(title="VehicleTrust — HTTP/JSON API Gateway & Web Frontend", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,

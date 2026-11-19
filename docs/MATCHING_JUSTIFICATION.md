@@ -1,4 +1,4 @@
-# VehicleTrust AI: Matching Algorithm Justification & Empirical Evaluation
+# VehicleTrust: Matching Algorithm Justification & Empirical Evaluation
 
 ## 1. Executive Summary
 

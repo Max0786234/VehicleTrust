@@ -1,7 +1,7 @@
-# VehicleTrust AI 🛡️
+# VehicleTrust 🛡️
 ### Federated vehicle-record integration across independent databases
 
-VehicleTrust AI answers questions such as *"Check the complete history of DL01AB1234"* or
+VehicleTrust answers questions such as *"Check the complete history of DL01AB1234"* or
 *"Is this vehicle insured, stolen or scrapped?"*. The information needed lives in **five independent
 databases** owned by different organisations and running on **two machines**. The system finds the
 vehicle in every database even when the registration number is noisy (for example read by OCR as

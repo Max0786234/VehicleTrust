@@ -1,4 +1,4 @@
-"""Central service topology and environment configuration for VehicleTrustAI.
+"""Central service topology and environment configuration for VehicleTrust.
 
 Every component (services, gateway, Streamlit, launcher) reads service locations
 from here so that the two-laptop split is configured in exactly one place (.env).

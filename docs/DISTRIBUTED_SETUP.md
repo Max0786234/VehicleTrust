@@ -15,10 +15,10 @@ All commands are PowerShell, run inside the project folder.
 
 ## 1. Prepare the teammate's copy (on Laptop 1)
 ```powershell
-cd C:\Users\<you>\Downloads\VehicleTrustAI
+cd C:\Users\<you>\Downloads\VehicleTrust
 python start_node.py package machine-2
 ```
-This creates `dist\VehicleTrustAI-machine-2\` and `dist\VehicleTrustAI-machine-2.zip`: the whole code base,
+This creates `dist\VehicleTrust-machine-2\` and `dist\VehicleTrust-machine-2.zip`: the whole code base,
 documents and docs, **without** any `.db` file, virtualenv or backups, plus a `.env` and `DEPLOYMENT_ROLE.txt`.
 Laptop 2 creates its three databases from the seed data. To ship the *current* contents of those three
 databases instead, use `python start_node.py package machine-2 --with-data`.
@@ -27,8 +27,8 @@ Give the zip to the teammate (USB stick, shared drive, e-mail).
 
 ## 2. Laptop 2 (teammate)
 ```powershell
-Expand-Archive .\VehicleTrustAI-machine-2.zip -DestinationPath C:\VehicleTrustAI
-cd C:\VehicleTrustAI\VehicleTrustAI-machine-2
+Expand-Archive .\VehicleTrust-machine-2.zip -DestinationPath C:\VehicleTrust
+cd C:\VehicleTrust\VehicleTrust-machine-2
 
 python --version                                   # Python 3.x must be installed (tested with 3.14)
 python -m venv .venv                               # recommended
@@ -57,7 +57,7 @@ The launcher checks dependencies and ports, initializes the databases, waits unt
 
 ## 3. Laptop 1 (you)
 ```powershell
-cd C:\Users\<you>\Downloads\VehicleTrustAI
+cd C:\Users\<you>\Downloads\VehicleTrust
 python -m pip install -r requirements.txt          # (or the venv variant above)
 python -m pip install -r requirements-ocr.txt      # optional: plate-image OCR (EasyOCR + PyTorch)
 
@@ -132,9 +132,9 @@ Manual, with the real ports on one PC:
 python start_node.py package machine-2 --out C:\sim\laptop2
 python start_node.py package machine-1 --out C:\sim\laptop1
 # window A
-cd C:\sim\laptop2\VehicleTrustAI-machine-2; python start_node.py machine-2
+cd C:\sim\laptop2\VehicleTrust-machine-2; python start_node.py machine-2
 # window B (use this PC's own IPv4 from ipconfig)
-cd C:\sim\laptop1\VehicleTrustAI-machine-1; python start_node.py configure machine-1 --machine2-ip 192.168.x.y; python start_node.py machine-1
+cd C:\sim\laptop1\VehicleTrust-machine-1; python start_node.py configure machine-1 --machine2-ip 192.168.x.y; python start_node.py machine-1
 ```
 Single laptop without any split: `python start_node.py all`.
 

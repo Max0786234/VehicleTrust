@@ -227,7 +227,7 @@ class DocumentStore:
             identifiers["fir_numbers"] = sorted(set(identifiers["fir_numbers"]) | {fields["fir number"].upper()})
         tokens = [t for t in tokenize(text) if not t.isdigit()]
         keywords = [w for w, _ in Counter(tokens).most_common(12) if w not in ("synthetic", "demonstration", "document",
-                                                                               "vehicletrustai", "coursework", "record", "real")][:8]
+                                                                               "vehicletrust", "coursework", "record", "real")][:8]
         title_line = next((l for l in text.split("\n") if l and SYNTHETIC_MARKER not in l), "").lstrip("# ").strip()
         return {
             "doc_id": fields.get("document id") or os.path.splitext(os.path.basename(rel_path))[0],

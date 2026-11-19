@@ -1,4 +1,4 @@
-"""Synthetic demonstration data for the five VehicleTrustAI databases.
+"""Synthetic demonstration data for the five VehicleTrust databases.
 
 ALL DATA IS SYNTHETIC (coursework demonstration only; not real people or vehicles).
 
@@ -635,7 +635,7 @@ def seed_database_5(db_path=None):
 def seed_all_databases(keys=None, reset=False):
     import config
     keys = keys or config.ALL_SERVICE_KEYS
-    print(f"VehicleTrust AI: initializing {len(keys)} database(s) (non-destructive{'; RESET requested' if reset else ''})...")
+    print(f"VehicleTrust: initializing {len(keys)} database(s) (non-destructive{'; RESET requested' if reset else ''})...")
     for key in keys:
         _init(key, reset=reset)
     print("Database initialization completed.")
@@ -645,7 +645,7 @@ if __name__ == "__main__":
     import argparse
     import config
 
-    parser = argparse.ArgumentParser(description="Initialize / migrate / seed VehicleTrustAI databases")
+    parser = argparse.ArgumentParser(description="Initialize / migrate / seed VehicleTrust databases")
     parser.add_argument("--only", choices=sorted(config.MACHINE_GROUPS), help="initialize only this machine's databases")
     parser.add_argument("--reset", action="store_true", help="back up, delete and re-create the selected databases")
     args = parser.parse_args()

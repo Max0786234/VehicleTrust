@@ -1,4 +1,4 @@
-"""The five independent VehicleTrustAI databases.
+"""The five independent VehicleTrust databases.
 
 Each module owns one SQLite file: its SQLAlchemy models (4-6 FK-linked tables),
 a migration from the Phase 2 single-table schema, and local FK-PK context
