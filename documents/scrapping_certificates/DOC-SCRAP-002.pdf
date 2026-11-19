@@ -1,0 +1,36 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Length 662 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td (SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.) Tj T* () Tj T* (SCRAPPING APPLICATION RECEIPT) Tj T* () Tj T* (Document ID: DOC-SCRAP-002) Tj T* (Document Type: Scrapping Certificate) Tj T* (Issued By: Shimla Registered Vehicle Scrapping Facility) Tj T* (Date: 2024-04-01) Tj T* (Registration Number: HP01CC2323) Tj T* (Make: MG) Tj T* (Model: Hector) Tj T* (Vehicle Status: PENDING_SCRAP) Tj T* () Tj T* (Application received. The vehicle will be dismantled after physical verification of the) Tj T* (chassis number. A Certificate of Deposit will be issued after scrapping.) Tj T* () Tj T* ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Title (Scrapping Application Receipt) /Subject (DOC-SCRAP-002 \(synthetic\)) /Producer (VehicleTrustAI synthetic generator) >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000212 00000 n 
+0000000925 00000 n 
+0000001051 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R /Info 6 0 R >>
+startxref
+1197
+%%EOF

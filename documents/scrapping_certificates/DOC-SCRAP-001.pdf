@@ -1,0 +1,36 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Length 712 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td (SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.) Tj T* () Tj T* (CERTIFICATE OF DEPOSIT \(VEHICLE SCRAPPING\)) Tj T* () Tj T* (Document ID: DOC-SCRAP-001) Tj T* (Document Type: Scrapping Certificate) Tj T* (Issued By: Kolkata Registered Vehicle Scrapping Facility) Tj T* (Date: 2021-03-01) Tj T* (Registration Number: WB02K0001) Tj T* (Certificate Number: COD-WB-2021-00087) Tj T* (Make: Mercedes-Benz) Tj T* (Model: C-Class) Tj T* (Vehicle Status: SCRAPPED) Tj T* () Tj T* (The vehicle has been received and scrapped. The registering authority must cancel the) Tj T* (registration certificate on receipt of this certificate.) Tj T* () Tj T* ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Title (Certificate of Deposit \(Vehicle Scrapping\)) /Subject (DOC-SCRAP-001 \(synthetic\)) /Producer (VehicleTrustAI synthetic generator) >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000212 00000 n 
+0000000975 00000 n 
+0000001101 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R /Info 6 0 R >>
+startxref
+1262
+%%EOF

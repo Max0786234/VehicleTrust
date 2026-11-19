@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VehicleTrust AI — Distributed Vehicle Insurance Verification</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #0ea5e9;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #a855f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { background: #111827; border-bottom: 1px solid var(--card-border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; color: #fff; }
+    .brand span { font-size: 0.75rem; background: #0369a1; color: #e0f2fe; padding: 0.2rem 0.5rem; border-radius: 9999px; }
+    .nav-tabs { display: flex; gap: 0.5rem; background: var(--card-bg); padding: 0.5rem 2rem; border-bottom: 1px solid var(--card-border); overflow-x: auto; }
+    .nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
+    .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .nav-btn.active { color: #fff; background: #0284c7; }
+    main { flex: 1; padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .grid { display: grid; gap: 1.5rem; }
+    .grid-4 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 1.25rem; }
+    .card h2 { font-size: 1.1rem; margin-bottom: 1rem; color: #fff; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .badge-success { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid #22c55e; }
+    .badge-danger { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid #ef4444; }
+    .badge-warning { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid #f59e0b; }
+    .badge-info { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid #a855f7; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; }
+    input, select, textarea { width: 100%; background: #0f172a; border: 1px solid var(--card-border); border-radius: 6px; padding: 0.6rem 0.8rem; color: #fff; font-size: 0.875rem; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    button.btn { background: #0284c7; color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: background 0.2s; }
+    button.btn:hover { background: var(--primary-hover); }
+    button.btn-danger { background: #b91c1c; }
+    button.btn-danger:hover { background: #dc2626; }
+    button.btn-success { background: #15803d; }
+    button.btn-success:hover { background: #16a34a; }
+    .table-container { overflow-x: auto; margin-top: 1rem; border: 1px solid var(--card-border); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+    th { background: #111827; padding: 0.75rem 1rem; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--card-border); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    .metric-val { font-size: 1.75rem; font-weight: 700; color: #fff; margin: 0.5rem 0; }
+    .code-box { background: #090d16; padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; color: #38bdf8; overflow-x: auto; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span style="font-size: 1.5rem;">🛡️</span>
+      <div>
+        <h1>VehicleTrust AI</h1>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Distributed Vehicle Insurance Verification Platform</p>
+      </div>
+    </div>
+    <div id="global-status">
+      <span class="badge badge-success">● System Operational</span>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="nav-btn active" onclick="switchTab('status')">📊 System Status</button>
+    <button class="nav-btn" onclick="switchTab('federated')">🌐 Federated Query (Phase 3)</button>
+    <button class="nav-btn" onclick="switchTab('ocr')">📷 OCR & Database Insert</button>
+    <button class="nav-btn" onclick="switchTab('search')">🔍 Fuzzy Search & Risk</button>
+    <button class="nav-btn" onclick="switchTab('sql')">💻 SQL Query Console</button>
+    <button class="nav-btn" onclick="switchTab('cleansing')">⚖️ Cleansing & Audit</button>
+    <button class="nav-btn" onclick="switchTab('crud')">🗄️ Database CRUD Explorer</button>
+  </nav>
+
+  <main>
+    <!-- TAB 1: STATUS -->
+    <div id="tab-status" class="tab-content active">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+          <h2>Distributed Database Nodes Monitor</h2>
+          <p style="color: var(--text-muted); font-size: 0.875rem;">Health and connectivity status of the 5 independent SQLite FastAPI services (2+3 split across two laptops).</p>
+        </div>
+        <button class="btn" onclick="fetchStatus()">🔄 Refresh Status</button>
+      </div>
+      <div class="grid grid-4" id="nodes-grid">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+
+    <!-- TAB: PHASE 3 FEDERATED QUERY -->
+    <div id="tab-federated" class="tab-content">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h2>🌐 Federated Query → Context Accumulation → Document Retrieval</h2>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">The full interactive view (FK-PK graphs, timelines, cleansing) is in the Streamlit dashboard on port 8501.</p>
+        <textarea id="fq-query" rows="2" style="width:100%;">Check the complete history of vehicle DL01AB1234.</textarea>
+        <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+          <input id="fq-plate" placeholder="Explicit / OCR plate (optional)" style="flex:1; min-width:180px;">
+          <button class="btn" onclick="runFederated()">🚀 Run federated query</button>
+        </div>
+      </div>
+      <div id="fq-output"></div>
+    </div>
+
+    <!-- TAB 2: OCR & INSERT -->
+    <div id="tab-ocr" class="tab-content">
+      <div class="grid grid-2">
+        <div class="card">
+          <h2>1. Plate Image Upload & OCR Analysis</h2>
+          <div class="form-group">
+            <label>Select Plate Image (JPG/PNG)</label>
+            <input type="file" id="ocr-file-input" accept="image/*" onchange="previewImage(event)">
+          </div>
+          <div id="image-preview-container" style="display:none; margin-bottom: 1rem;">
+            <img id="image-preview" style="max-width: 100%; border-radius: 6px; border: 1px solid var(--card-border);">
+          </div>
+          <button class="btn" onclick="uploadAndRunOCR()" style="width: 100%;">⚡ Run OCR Recognition</button>
+          <p id="ocr-progress" role="status" aria-live="polite" style="display:none; margin-top:0.75rem; color:var(--primary); font-size:0.85rem;"></p>
+
+          <div id="ocr-results-box" style="display:none; margin-top: 1.5rem;">
+            <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid var(--primary); padding: 1rem; border-radius: 6px;">
+              <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700;">Recognized Plate</span>
+              <div id="ocr-norm-plate" style="font-size: 1.5rem; font-weight: 800; color: #fff; margin: 0.25rem 0;"></div>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Raw Text: <span id="ocr-raw-text" style="color:#fff;"></span> | Confidence: <span id="ocr-conf" style="color:#fff;"></span></p>
+            </div>
+            <div style="margin-top: 1rem;">
+              <label>OCR Visual Confusion Alternatives:</label>
+              <div id="ocr-variants" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;"></div>
+            </div>
+            <p id="ocr-message" style="margin-top:0.75rem; color:var(--warning); font-size:0.85rem;"></p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>2. Insert Plate Record into Database</h2>
+          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">Save recognized or manual vehicle plate directly into the remote database service.</p>
+          <div class="form-group">
+            <label>Target Database Service</label>
+            <select id="ins-target-db">
+              <option value="vehicle_registry">Database 1: Vehicle Registry (Port 8101)</option>
+              <option value="registration_authority">Database 3: Registration Authority RTO (Port 8103)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Registration Number / Plate Identifier</label>
+            <input type="text" id="ins-plate" placeholder="e.g. DL01AB1234">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Make</label>
+              <input type="text" id="ins-make" placeholder="e.g. Honda">
+            </div>
+            <div class="form-group">
+              <label>Model</label>
+              <input type="text" id="ins-model" placeholder="e.g. City">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Colour</label>
+              <input type="text" id="ins-colour" placeholder="e.g. White">
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" id="ins-state" placeholder="e.g. Delhi">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Registration Date (YYYY-MM-DD)</label>
+            <input type="text" id="ins-date" value="2024-05-15">
+          </div>
+          <button class="btn btn-success" onclick="insertNewRecord()" style="width: 100%;">💾 Insert Record into Database</button>
+          <div id="insert-msg" style="margin-top: 1rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: FUZZY SEARCH & RISK -->
+    <div id="tab-search" class="tab-content">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h2>🔍 Multi-Database Fuzzy Candidate Search</h2>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; align-items: end;">
+          <div class="form-group" style="margin: 0;">
+            <label>Registration Plate Search Query</label>
+            <input type="text" id="search-plate-input" placeholder="e.g. DL01AB1234 or DLO1AB1234">
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label>Similarity Threshold: <span id="thresh-val">0.50</span></label>
+            <input type="range" id="search-thresh" min="0.2" max="0.95" step="0.05" value="0.50" oninput="document.getElementById('thresh-val').innerText = this.value">
+          </div>
+          <button class="btn" onclick="executeSearch()" style="height: 40px;">Search All Databases</button>
+        </div>
+        <div style="margin-top: 1rem;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Optional observed details from the vehicle image help rank and verify likely matches; they are not treated as official source data.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin: 0;"><label>Observed Make</label><input type="text" id="observed-make" placeholder="e.g. Honda"></div>
+            <div class="form-group" style="margin: 0;"><label>Observed Model</label><input type="text" id="observed-model" placeholder="e.g. City"></div>
+            <div class="form-group" style="margin: 0;"><label>Observed Colour</label><input type="text" id="observed-colour" placeholder="e.g. White"></div>
+            <div class="form-group" style="margin: 0;"><label>Observed State</label><input type="text" id="observed-state" placeholder="e.g. Delhi"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="search-results-section" style="display: none;">
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <h2>🚦 Insurance Risk Compliance Outcome</h2>
+          <div id="risk-banner" style="padding: 1rem; border-radius: 6px; margin-bottom: 1rem;"></div>
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div>
+              <p><strong>Action Recommendation:</strong> <span id="risk-action"></span></p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;" id="risk-disclaimer"></p>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 6px;">
+              <p><strong>Theft Status:</strong> <span id="theft-stat"></span></p>
+              <p><strong>Scrapping Status:</strong> <span id="scrap-stat"></span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Candidate Records Ranked by Algorithm</h2>
+          <div class="table-container">
+            <table id="candidates-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Target Plate</th>
+                  <th>Source DB</th>
+                  <th>Combined Score</th>
+                  <th>Confidence</th>
+                  <th>Edit Dist</th>
+                  <th>RapidFuzz</th>
+                  <th>DL Sim</th>
+                  <th>Method</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <h2>⚖️ Review Cleansing Proposals</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Proposals use the registration-authority record as evidence. Confirm each proposed edit before it changes the registry.</p>
+          <div id="search-cleansing-proposals"><p style="color: var(--text-muted);">Search a plate to check for verified corrections.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: SQL CONSOLE -->
+    <div id="tab-sql" class="tab-content">
+      <div class="card">
+        <h2>💻 Interactive Multi-Database SQL Query Console</h2>
+        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">Execute read-only SQL queries directly against any of the 4 independent SQLite databases or the central audit ledger.</p>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label>Target SQLite Database</label>
+            <select id="sql-db-select">
+              <option value="vehicle_registry.db">vehicle_registry.db (Port 8101)</option>
+              <option value="insurance_records.db">insurance_records.db (Port 8102)</option>
+              <option value="registration_authority.db">registration_authority.db (Port 8103)</option>
+              <option value="theft_scrapping.db">theft_scrapping.db (Port 8104)</option>
+              <option value="audit_log.db">audit_log.db (Central Cleansing Ledger)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quick Query Templates</label>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="setSql('SELECT * FROM vehicle_registry LIMIT 10')">Registry 10</button>
+              <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="setSql('SELECT * FROM insurance_policies WHERE policy_status = \'EXPIRED\'')">Expired Policies</button>
+              <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="setSql('SELECT * FROM theft_scrapping_records WHERE theft_status != \'CLEAR\'')">Stolen Vehicles</button>
+              <button class="btn" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="setSql('SELECT * FROM cleansing_audit_log ORDER BY id DESC LIMIT 10')">Recent Audit Logs</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>SQL Query Statement</label>
+          <textarea id="sql-query-input" rows="4" style="font-family: monospace;">SELECT * FROM vehicle_registry LIMIT 10;</textarea>
+        </div>
+        <button class="btn" onclick="executeSql()">⚡ Run SQL Query</button>
+        <div id="sql-results-box" style="margin-top: 1.5rem; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);" id="sql-meta"></span>
+          </div>
+          <div class="table-container">
+            <table id="sql-result-table">
+              <thead id="sql-thead"></thead>
+              <tbody id="sql-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: CLEANSING & AUDIT -->
+    <div id="tab-cleansing" class="tab-content">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h2>⚖️ Data Cleansing Proposals Review</h2>
+        <div id="proposals-container">
+          <p style="color: var(--text-muted);">Perform a search or select a plate to check for cross-database attribute discrepancies.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📜 Immutable Cleansing Audit Trail (`audit_log.db`)</h2>
+        <div class="table-container">
+          <table id="audit-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Affected Source</th>
+                <th>Record ID</th>
+                <th>Field</th>
+                <th>Old Value</th>
+                <th>New Value</th>
+                <th>Decision</th>
+                <th>Timestamp (UTC)</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: CRUD -->
+    <div id="tab-crud" class="tab-content">
+      <div class="card">
+        <h2>🗄️ Database CRUD Explorer & Record Management</h2>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+          <button class="btn" id="crud-btn-vehicle_registry" onclick="loadCrud('vehicle_registry')">1. Registry (8101)</button>
+          <button class="btn" id="crud-btn-insurance_records" onclick="loadCrud('insurance_records')">2. Insurance (8102)</button>
+          <button class="btn" id="crud-btn-registration_authority" onclick="loadCrud('registration_authority')">3. Authority (8103)</button>
+          <button class="btn" id="crud-btn-theft_scrapping" onclick="loadCrud('theft_scrapping')">4. Theft (8104)</button>
+        </div>
+
+        <!-- Add Record Section -->
+        <div class="card" style="margin-bottom: 1rem; background: rgba(0,0,0,0.2);">
+          <h3 id="crud-add-title" style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--primary);">➕ Insert New Record</h3>
+          <div id="crud-add-fields" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;"></div>
+          <button class="btn btn-success" style="margin-top: 0.75rem;" onclick="submitCrudAdd()">💾 Add Record</button>
+          <span id="crud-add-msg" style="margin-left: 0.75rem; font-size: 0.85rem;"></span>
+        </div>
+
+        <!-- Edit Modal / Panel -->
+        <div id="crud-edit-panel" class="card" style="display:none; margin-bottom: 1rem; border-color: var(--warning); background: rgba(245,158,11,0.05);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <h3 id="crud-edit-title" style="font-size: 0.95rem; color: var(--warning);">✏️ Edit Record</h3>
+            <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="closeEditModal()">✖ Cancel</button>
+          </div>
+          <input type="hidden" id="edit-record-id">
+          <div id="crud-edit-fields" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;"></div>
+          <div style="margin-top: 0.75rem;">
+            <button class="btn btn-warning" onclick="submitCrudEdit()">💾 Save Changes</button>
+            <span id="crud-edit-msg" style="margin-left: 0.75rem; font-size: 0.85rem;"></span>
+          </div>
+        </div>
+
+        <div id="crud-status-box" style="margin-bottom: 0.5rem; color: var(--primary); font-size: 0.85rem;"></div>
+        <div class="table-container">
+          <table id="crud-table">
+            <thead id="crud-thead"></thead>
+            <tbody id="crud-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      event.target.classList.add('active');
+
+      if (tabId === 'status') fetchStatus();
+      if (tabId === 'cleansing') fetchAuditLogs();
+      if (tabId === 'crud') loadCrud('vehicle_registry');
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/api/status`);
+        const data = await res.json();
+        const grid = document.getElementById('nodes-grid');
+        grid.innerHTML = '';
+        for (const [key, svc] of Object.entries(data.services)) {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h2>${key.replace('_', ' ').toUpperCase()}</h2>
+            <div style="margin: 0.5rem 0;">
+              ${svc.online ? `<span class="badge badge-success">🟢 ONLINE (${svc.latency_ms} ms)</span>` : `<span class="badge badge-danger">🔴 OFFLINE</span>`}
+            </div>
+            <div class="metric-val">${svc.record_count}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${svc.url}</div>
+          `;
+          grid.appendChild(card);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function previewImage(event) {
+      const input = event.target;
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById('image-preview');
+          img.src = e.target.result;
+          document.getElementById('image-preview-container').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    async function uploadAndRunOCR() {
+      const fileInput = document.getElementById('ocr-file-input');
+      if (!fileInput.files || !fileInput.files[0]) {
+        alert("Please select a plate image file first.");
+        return;
+      }
+      const button = document.querySelector("button[onclick='uploadAndRunOCR()']");
+      const progress = document.getElementById('ocr-progress');
+      const resultBox = document.getElementById('ocr-results-box');
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+      button.disabled = true;
+      button.innerText = "⏳ Processing image...";
+      progress.style.display = 'block';
+      progress.innerText = "Sending image for OCR. On first use, EasyOCR may need time to load its recognition model; keep this page open.";
+      resultBox.style.display = 'none';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/ocr`, { method: "POST", body: formData });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.detail || `OCR service returned HTTP ${res.status}`);
+        }
+        resultBox.style.display = 'block';
+        document.getElementById('ocr-norm-plate').innerText = data.normalized_plate || "UNREADABLE";
+        document.getElementById('ocr-raw-text').innerText = data.raw_text || "None";
+        document.getElementById('ocr-conf').innerText = `${Math.round(data.confidence * 100)}%`;
+        document.getElementById('ocr-message').innerText = data.message || '';
+
+        const variantsDiv = document.getElementById('ocr-variants');
+        variantsDiv.innerHTML = '';
+        if (data.ocr_variants) {
+          data.ocr_variants.forEach(v => {
+            const span = document.createElement('span');
+            span.className = 'code-box';
+            span.style.cursor = 'pointer';
+            span.innerText = v;
+            span.onclick = () => { document.getElementById('ins-plate').value = v; };
+            variantsDiv.appendChild(span);
+          });
+        }
+
+        document.getElementById('ins-plate').value = data.normalized_plate;
+        document.getElementById('search-plate-input').value = data.normalized_plate;
+        progress.innerText = data.normalized_plate ? "OCR complete. The detected plate is ready for search." : (data.message || "OCR finished without a plate; enter the plate manually.");
+      } catch (e) {
+        progress.innerText = `OCR failed: ${e.message}`;
+        progress.style.color = 'var(--danger)';
+      } finally {
+        button.disabled = false;
+        button.innerText = "⚡ Run OCR Recognition";
+      }
+    }
+
+    async function insertNewRecord() {
+      const targetDb = document.getElementById('ins-target-db').value;
+      const plate = document.getElementById('ins-plate').value.trim();
+      const make = document.getElementById('ins-make').value.trim();
+      const model = document.getElementById('ins-model').value.trim();
+      const colour = document.getElementById('ins-colour').value.trim();
+      const state = document.getElementById('ins-state').value.trim();
+      const date = document.getElementById('ins-date').value.trim();
+
+      if (!plate || !make || !model) {
+        alert("Please provide at least Plate, Make, and Model.");
+        return;
+      }
+
+      const payload = targetDb === 'vehicle_registry' ? {
+        registration_number: plate, make: make, model: model, colour: colour || "White",
+        vehicle_type: "Sedan", registration_date: date, state: state || "Delhi"
+      } : {
+        plate_identifier: plate, make: make, model: model, colour: colour || "White",
+        registration_date: date, state: state || "Delhi", authority_reference: "RTO-NEW-01"
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/services/${targetDb}/records`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        const msgBox = document.getElementById('insert-msg');
+        if (res.status === 201) {
+          msgBox.innerHTML = `<span class="badge badge-success">Successfully inserted record #${data.id} into ${targetDb}!</span>`;
+        } else {
+          msgBox.innerHTML = `<span class="badge badge-danger">Error ${res.status}: ${data.detail || JSON.stringify(data)}</span>`;
+        }
+      } catch (e) {
+        alert("Failed to insert: " + e.message);
+      }
+    }
+
+    async function executeSearch() {
+      const plate = document.getElementById('search-plate-input').value.trim();
+      const thresh = parseFloat(document.getElementById('search-thresh').value);
+      if (!plate) return alert("Enter a plate to search.");
+
+      const response = await fetch(`${API_BASE}/api/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query_plate: plate,
+          threshold: thresh,
+          make: document.getElementById('observed-make').value.trim() || null,
+          model: document.getElementById('observed-model').value.trim() || null,
+          colour: document.getElementById('observed-colour').value.trim() || null,
+          state: document.getElementById('observed-state').value.trim() || null
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || `Search failed (${response.status})`);
+      document.getElementById('search-results-section').style.display = 'block';
+
+      // Risk banner
+      const risk = data.insurance_risk;
+      const banner = document.getElementById('risk-banner');
+      banner.className = `badge-${risk.status === 'CURRENT' ? 'success' : risk.status === 'EXPIRED' ? 'danger' : 'warning'}`;
+      banner.style.padding = '1rem';
+      banner.innerHTML = `<h3 style="margin:0;">🛡️ STATUS: ${risk.status_label}</h3>`;
+      document.getElementById('risk-action').innerText = risk.recommended_action;
+      document.getElementById('risk-disclaimer').innerText = risk.disclaimer;
+      document.getElementById('theft-stat').innerText = risk.theft_status;
+      document.getElementById('scrap-stat').innerText = risk.scrapping_status;
+
+      // Candidates table
+      const tbody = document.querySelector('#candidates-table tbody');
+      tbody.innerHTML = '';
+      data.candidates.forEach((c, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td><strong>${c.recorded_registration_number}</strong></td>
+          <td>${c.source_database}</td>
+          <td>${c.combined_score.toFixed(3)}</td>
+          <td><span class="badge badge-${c.confidence === 'HIGH' ? 'success' : c.confidence === 'MEDIUM' ? 'warning' : 'danger'}">${c.confidence}</span></td>
+          <td>${c.edit_distance}</td>
+          <td>${c.plate_similarity.toFixed(2)}</td>
+          <td>${c.dl_similarity.toFixed(2)}</td>
+          <td>${c.matching_method}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      renderCleansingProposals(data.cleansing_proposals || []);
+    }
+
+    function renderCleansingProposals(proposals) {
+      const container = document.getElementById('search-cleansing-proposals');
+      container.replaceChildren();
+      if (!proposals.length) {
+        const message = document.createElement('p');
+        message.style.color = 'var(--text-muted)';
+        message.innerText = 'No safe corrections found. Both registry and registration-authority records must match the queried vehicle.';
+        container.appendChild(message);
+        return;
+      }
+
+      proposals.forEach((proposal, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.marginBottom = '1rem';
+        const heading = document.createElement('h3');
+        heading.innerText = `Proposal ${index + 1}: ${proposal.field_label}`;
+        const evidence = document.createElement('p');
+        evidence.style.cssText = 'color: var(--text-muted); margin: 0.75rem 0;';
+        evidence.innerText = `Vehicle ${proposal.registry_plate}: registry “${proposal.current_value || '(empty)'}” → authority “${proposal.proposed_value}”.`;
+        const reason = document.createElement('label');
+        reason.innerText = 'Reviewer note';
+        reason.style.marginTop = '0.5rem';
+        const note = document.createElement('input');
+        note.type = 'text';
+        note.value = proposal.reason;
+        note.style.marginBottom = '0.75rem';
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display: flex; gap: 0.5rem; flex-wrap: wrap;';
+
+        ['ACCEPTED', 'REJECTED', 'UNRESOLVED'].forEach(decision => {
+          const button = document.createElement('button');
+          button.className = decision === 'ACCEPTED' ? 'btn btn-success' : 'btn';
+          button.innerText = decision === 'ACCEPTED' ? 'Accept correction' : decision === 'REJECTED' ? 'Reject' : 'Leave unresolved';
+          button.addEventListener('click', () => submitCleansingDecision(proposal, decision, note.value, button));
+          actions.appendChild(button);
+        });
+        card.append(heading, evidence, reason, note, actions);
+        container.appendChild(card);
+      });
+    }
+
+    async function submitCleansingDecision(proposal, decision, reason, button) {
+      button.disabled = true;
+      try {
+        const response = await fetch(`${API_BASE}/api/cleansing/decide`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ proposal, decision, reason })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.detail || `Review failed (${response.status})`);
+        await fetchAuditLogs();
+        if (!result.success) {
+          alert(result.message || 'The correction was not applied.');
+          button.disabled = false;
+          return;
+        }
+        alert(result.message);
+        if (decision === 'ACCEPTED') {
+          await executeSearch();
+        } else {
+          button.closest('.card').remove();
+        }
+      } catch (error) {
+        alert(`Cleansing decision failed: ${error.message}`);
+        button.disabled = false;
+      }
+    }
+
+    function setSql(q) {
+      document.getElementById('sql-query-input').value = q;
+    }
+
+    async function executeSql() {
+      const db = document.getElementById('sql-db-select').value;
+      const q = document.getElementById('sql-query-input').value.trim();
+      if (!q) return alert("Query is empty.");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/sql`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ database: db, query: q })
+        });
+        const data = await res.json();
+        const box = document.getElementById('sql-results-box');
+        box.style.display = 'block';
+
+        if (res.status !== 200) {
+          box.innerHTML = `<div style="color: var(--danger); padding: 1rem; background: rgba(239,68,68,0.1); border-radius: 6px;">${data.detail || data.error}</div>`;
+          return;
+        }
+
+        document.getElementById('sql-meta').innerText = `Returned ${data.row_count} row(s) in ${data.execution_time_ms} ms from ${data.database}`;
+        const thead = document.getElementById('sql-thead');
+        const tbody = document.getElementById('sql-tbody');
+        thead.innerHTML = '<tr>' + data.columns.map(c => `<th>${c}</th>`).join('') + '</tr>';
+        tbody.innerHTML = data.rows.map(r => '<tr>' + r.map(v => `<td>${v !== null ? v : '<em style="color:#666">NULL</em>'}</td>`).join('') + '</tr>').join('');
+      } catch (e) {
+        alert("SQL error: " + e.message);
+      }
+    }
+
+    async function fetchAuditLogs() {
+      const res = await fetch(`${API_BASE}/api/audit-logs?limit=50`);
+      const logs = await res.json();
+      const tbody = document.querySelector('#audit-table tbody');
+      tbody.innerHTML = logs.map(l => `
+        <tr>
+          <td>${l.id}</td>
+          <td>${l.affected_source}</td>
+          <td>${l.record_id}</td>
+          <td>${l.field_name}</td>
+          <td>${l.old_value || '-'}</td>
+          <td>${l.new_value || '-'}</td>
+          <td><span class="badge badge-${l.reviewer_decision === 'ACCEPTED' ? 'success' : 'danger'}">${l.reviewer_decision}</span></td>
+          <td>${l.timestamp}</td>
+          <td>${l.reason || ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    let activeCrudSource = 'vehicle_registry';
+    let currentCrudData = [];
+
+    const DB_SCHEMAS = {
+      vehicle_registry: [
+        { key: "registration_number", label: "Registration No", default: "DL01ZZ9999" },
+        { key: "make", label: "Make", default: "Honda" },
+        { key: "model", label: "Model", default: "City" },
+        { key: "colour", label: "Colour", default: "White" },
+        { key: "vehicle_type", label: "Type", default: "Sedan" },
+        { key: "registration_date", label: "Reg Date (YYYY-MM-DD)", default: "2024-01-01" },
+        { key: "state", label: "State", default: "Delhi" }
+      ],
+      insurance_records: [
+        { key: "policy_number", label: "Policy No", default: "POL-TEST-001" },
+        { key: "recorded_vehicle_number", label: "Vehicle Reg No", default: "DL01ZZ9999" },
+        { key: "insurer", label: "Insurer", default: "HDFC ERGO General Insurance" },
+        { key: "policy_start_date", label: "Start Date (YYYY-MM-DD)", default: "2026-01-01" },
+        { key: "expiry_date", label: "Expiry Date (YYYY-MM-DD)", default: "2027-01-01" },
+        { key: "policy_status", label: "Status (ACTIVE/EXPIRED)", default: "ACTIVE" }
+      ],
+      registration_authority: [
+        { key: "plate_identifier", label: "Plate Identifier", default: "DL01ZZ9999" },
+        { key: "make", label: "Make", default: "Honda" },
+        { key: "model", label: "Model", default: "City" },
+        { key: "colour", label: "Colour", default: "White" },
+        { key: "registration_date", label: "Reg Date (YYYY-MM-DD)", default: "2024-01-01" },
+        { key: "state", label: "State", default: "Delhi" },
+        { key: "authority_reference", label: "RTO Ref", default: "RTO-DL01-2024-001" }
+      ],
+      theft_scrapping: [
+        { key: "reported_plate", label: "Reported Plate", default: "DL01ZZ9999" },
+        { key: "theft_status", label: "Theft Status (CLEAR/STOLEN)", default: "CLEAR" },
+        { key: "report_date", label: "Report Date (YYYY-MM-DD)", default: "2024-01-01" },
+        { key: "scrapping_status", label: "Scrap Status (ACTIVE/SCRAPPED)", default: "ACTIVE" }
+      ]
+    };
+
+    function renderCrudAddFields(sourceKey) {
+      const container = document.getElementById('crud-add-fields');
+      container.innerHTML = '';
+      const schema = DB_SCHEMAS[sourceKey] || [];
+      schema.forEach(field => {
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.style.margin = '0';
+        div.innerHTML = `
+          <label style="font-size:0.75rem;">${field.label}</label>
+          <input type="text" id="add-f-${field.key}" value="${field.default}">
+        `;
+        container.appendChild(div);
+      });
+      document.getElementById('crud-add-title').innerText = `➕ Insert New Record into ${sourceKey}`;
+      document.getElementById('crud-add-msg').innerText = '';
+    }
+
+    async function submitCrudAdd() {
+      const schema = DB_SCHEMAS[activeCrudSource] || [];
+      const payload = {};
+      schema.forEach(f => {
+        const el = document.getElementById(`add-f-${f.key}`);
+        if (el) payload[f.key] = el.value.trim();
+      });
+
+      const msgEl = document.getElementById('crud-add-msg');
+      try {
+        const res = await fetch(`${API_BASE}/api/services/${activeCrudSource}/records`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.status === 201) {
+          msgEl.innerHTML = `<span class="badge badge-success">Inserted #${data.id}</span>`;
+          await loadCrud(activeCrudSource);
+          await fetchStatus();
+        } else {
+          msgEl.innerHTML = `<span class="badge badge-danger">Error: ${data.detail || JSON.stringify(data)}</span>`;
+        }
+      } catch (err) {
+        msgEl.innerHTML = `<span class="badge badge-danger">${err.message}</span>`;
+      }
+    }
+
+    function openEditModal(sourceKey, id) {
+      const rec = currentCrudData.find(r => r.id === id);
+      if (!rec) return;
+      document.getElementById('edit-record-id').value = id;
+      document.getElementById('crud-edit-title').innerText = `✏️ Modify ${sourceKey} Record #${id}`;
+      const container = document.getElementById('crud-edit-fields');
+      container.innerHTML = '';
+
+      Object.keys(rec).forEach(key => {
+        if (key === 'id') return;
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.style.margin = '0';
+        div.innerHTML = `
+          <label style="font-size:0.75rem;">${key}</label>
+          <input type="text" id="edit-f-${key}" value="${rec[key] !== null ? rec[key] : ''}">
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('crud-edit-panel').style.display = 'block';
+      document.getElementById('crud-edit-msg').innerText = '';
+      document.getElementById('crud-edit-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeEditModal() {
+      document.getElementById('crud-edit-panel').style.display = 'none';
+      document.getElementById('crud-edit-msg').innerText = '';
+    }
+
+    async function submitCrudEdit() {
+      const id = document.getElementById('edit-record-id').value;
+      const rec = currentCrudData.find(r => String(r.id) === String(id));
+      if (!rec) return;
+
+      const updates = {};
+      Object.keys(rec).forEach(key => {
+        if (key === 'id') return;
+        const el = document.getElementById(`edit-f-${key}`);
+        if (el) {
+          const val = el.value.trim();
+          if (val !== String(rec[key] || '')) {
+            updates[key] = val;
+          }
+        }
+      });
+
+      const msgEl = document.getElementById('crud-edit-msg');
+      if (Object.keys(updates).length === 0) {
+        msgEl.innerHTML = `<span class="badge badge-warning">No changes detected.</span>`;
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/services/${activeCrudSource}/records/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msgEl.innerHTML = `<span class="badge badge-success">Saved #${id}</span>`;
+          setTimeout(() => closeEditModal(), 1200);
+          await loadCrud(activeCrudSource);
+        } else {
+          msgEl.innerHTML = `<span class="badge badge-danger">Update failed: ${data.detail || JSON.stringify(data)}</span>`;
+        }
+      } catch (err) {
+        msgEl.innerHTML = `<span class="badge badge-danger">${err.message}</span>`;
+      }
+    }
+
+    async function loadCrud(sourceKey) {
+      activeCrudSource = sourceKey;
+      closeEditModal();
+      renderCrudAddFields(sourceKey);
+
+      ['vehicle_registry', 'insurance_records', 'registration_authority', 'theft_scrapping'].forEach(k => {
+        const btn = document.getElementById(`crud-btn-${k}`);
+        if (btn) btn.className = k === sourceKey ? 'btn btn-success' : 'btn';
+      });
+
+      document.getElementById('crud-status-box').innerText = `Loading live records from ${sourceKey} through the gateway...`;
+      try {
+        const res = await fetch(`${API_BASE}/api/services/${sourceKey}/records`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        currentCrudData = data;
+        document.getElementById('crud-status-box').innerText = `Displaying ${data.length} records from ${sourceKey}`;
+        if (!data.length) {
+          document.getElementById('crud-status-box').innerText = `No records found in ${sourceKey}`;
+          document.getElementById('crud-thead').innerHTML = '';
+          document.getElementById('crud-tbody').innerHTML = '';
+          return;
+        }
+        const cols = Object.keys(data[0]);
+        document.getElementById('crud-thead').innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '<th>Actions</th></tr>';
+        document.getElementById('crud-tbody').innerHTML = data.map(r => `
+          <tr>
+            ${cols.map(c => `<td>${r[c]}</td>`).join('')}
+            <td style="white-space: nowrap;">
+              <button class="btn btn-warning" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; margin-right: 0.25rem;" onclick="openEditModal('${sourceKey}', ${r.id})">✏️ Modify</button>
+              <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="deleteCrudRecord('${sourceKey}', ${r.id})">🗑️ Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        document.getElementById('crud-status-box').innerText = `Failed to load: ${e.message}`;
+      }
+    }
+
+    async function deleteCrudRecord(sourceKey, id) {
+      if (!confirm(`Delete record #${id} from ${sourceKey}?`)) return;
+      try {
+        const response = await fetch(`${API_BASE}/api/services/${sourceKey}/records/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || `HTTP ${response.status}`);
+        alert(`Deleted record #${id}`);
+        await loadCrud(sourceKey);
+        await fetchStatus();
+      } catch (error) {
+        alert(`Delete failed: ${error.message}`);
+      }
+    }
+
+    // Auto load status on start
+    fetchStatus();
+
+    function fqEsc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    async function runFederated() {
+      const out = document.getElementById('fq-output');
+      out.innerHTML = '<p>Running federated query...</p>';
+      try {
+        const res = await fetch(`${API_BASE}/api/federated-query`, {method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({query: document.getElementById('fq-query').value, plate: document.getElementById('fq-plate').value || null})});
+        const r = await res.json();
+        if (!res.ok) throw new Error(r.detail || res.status);
+        const stages = (r.stages || []).map(s => `<div class="card" style="padding:0.5rem;min-width:140px;flex:1;"><b>${fqEsc(s.stage)}</b><br><small>${s.ms} ms</small><br><small>${fqEsc(s.detail)}</small></div>`).join('<div style="align-self:center;">→</div>');
+        let html = `<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;">${stages}</div>`;
+        if (r.error) { out.innerHTML = html + `<div class="card">${fqEsc(r.error)}</div>`; return; }
+        html += `<div class="card" style="margin-bottom:1rem;"><h2>🧾 ${fqEsc(r.answer.headline)}</h2><ul>` +
+          r.answer.statements.map(s => `<li><b>${fqEsc(s.kind)}</b>: ${fqEsc(s.text)}${s.sources.length ? `<br><small style="color:var(--text-muted)">sources: ${fqEsc(s.sources.join(', '))}</small>` : ''}</li>`).join('') + '</ul></div>';
+        html += '<div class="card" style="margin-bottom:1rem;"><h2>Subqueries</h2><div class="table-container"><table><thead><tr><th>Database</th><th>Wave</th><th>URL</th><th>Status</th><th>Latency ms</th><th>Matches</th><th>Tables touched</th></tr></thead><tbody>' +
+          r.context.subqueries.map(c => `<tr><td>${fqEsc(c.label)}</td><td>${c.wave}</td><td>${fqEsc(c.url)}</td><td>${fqEsc(c.status)}</td><td>${c.latency_ms}</td><td>${c.match_count}</td><td>${fqEsc(c.tables_touched.join(', '))}</td></tr>`).join('') + '</tbody></table></div></div>';
+        html += '<div class="card" style="margin-bottom:1rem;"><h2>FK-PK relationship paths</h2><ul>' + r.context.relationship_paths.map(p => `<li>${fqEsc(p.source)}: ${fqEsc(p.label)}</li>`).join('') + '</ul></div>';
+        html += '<div class="card"><h2>Retrieved documents</h2><div class="table-container"><table><thead><tr><th>Document</th><th>Type</th><th>Score</th><th>Why</th></tr></thead><tbody>' +
+          (r.documents.documents || []).map(d => `<tr><td>${fqEsc(d.doc_id)}</td><td>${fqEsc(d.document_type)}</td><td>${d.relevance_score}</td><td>${fqEsc(d.reasons.join(' · '))}</td></tr>`).join('') + '</tbody></table></div>' +
+          ((r.documents.rejected || []).length ? '<p><b>Rejected by context:</b> ' + r.documents.rejected.map(x => fqEsc(x.doc_id + ' — ' + x.reason)).join('; ') + '</p>' : '') + '</div>';
+        out.innerHTML = html;
+      } catch (e) { out.innerHTML = `<div class="card">Error: ${fqEsc(e.message)}</div>`; }
+    }
+  </script>
+</body>
+</html>

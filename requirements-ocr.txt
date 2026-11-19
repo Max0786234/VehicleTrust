@@ -1,0 +1,4 @@
+# Optional - plate-image OCR on Laptop 1 (gateway/Streamlit machine). Pulls in PyTorch (~1 GB).
+# Without it, the OCR endpoint reports that EasyOCR is unavailable and manual plate entry still works.
+-r requirements.txt
+easyocr>=1.7.0

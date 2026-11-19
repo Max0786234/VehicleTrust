@@ -1,0 +1,18 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+THEFT CLAIM REPUDIATION LETTER
+
+Document ID: DOC-INS-CLM-002
+Document Type: Insurance Claim Report
+Issued By: United India Insurance
+Date: 2024-07-30
+Registration Number: AS01BC4433
+Claim Number: CLM-UNITED-2024-1107
+Policy Number: POL-UNITED-4433
+Claim Type: THEFT
+Make: Maruti Suzuki
+Model: WagonR
+Claim Status: REJECTED
+
+The theft claim is repudiated. Police FIR AS-DSP-2024-0112 records the theft on 2024-02-14, while the policy commenced on 2024-06-21.
+A loss that occurred before the policy inception date is not covered. The insured may approach the Insurance Ombudsman within one year.

@@ -1,0 +1,16 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+PRE-SALE INSPECTION REPORT
+
+Document ID: DOC-INSP-004
+Document Type: Vehicle Inspection Report
+Issued By: Noida Pre-Owned Car Evaluators
+Date: 2025-08-28
+Registration Number: UP16BT9900
+Make: Toyota
+Model: Innova Crysta
+Colour: Grey
+Seller: Ramesh Gupta
+Buyer: Suresh Yadav
+
+Inspection performed before sale. The buyer Suresh Yadav will apply for transfer of ownership at Noida RTO. Insurance policy POL-NEWIND-1800 shown by the seller had already expired.

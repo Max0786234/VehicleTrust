@@ -1,0 +1,16 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+PRE-RENEWAL VEHICLE INSPECTION REPORT
+
+Document ID: DOC-INSP-001
+Document Type: Vehicle Inspection Report
+Issued By: HDFC ERGO Inspection Desk
+Date: 2025-12-20
+Registration Number: DL-01-AB-1234
+Make: Honda
+Model: City
+Colour: White
+Odometer: 48210 km
+Owner: Aarav Sharma
+
+Photographs of all four sides taken. Rear bumper shows minor scuff marks. Chassis and engine numbers match the registration certificate. Vehicle fit for renewal.

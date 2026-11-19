@@ -1,0 +1,20 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+MOTOR CLAIM SETTLEMENT REPORT
+
+Document ID: DOC-INS-CLM-001
+Document Type: Insurance Claim Report
+Issued By: HDFC ERGO General Insurance
+Date: 2026-04-02
+Registration Number: DL01AB1234
+Claim Number: CLM-HDFC-2026-0412
+Policy Number: POL-HDFC-9901
+Claim Date: 2026-03-18
+Make: Honda
+Model: City
+Colour: White
+Claim Status: SETTLED
+Amount Settled: INR 42500
+
+Surveyor report: rear bumper and right tail-lamp damaged in a low-speed collision near Connaught Place, New Delhi. Damage consistent with the reported cause.
+Repairs completed at an authorised Honda workshop. Claim settled under the comprehensive section after deductible.

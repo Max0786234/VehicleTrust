@@ -1,0 +1,17 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+FIRST INFORMATION REPORT - MOTOR VEHICLE THEFT
+
+Document ID: DOC-FIR-002
+Document Type: Theft Complaint
+Issued By: Dispur Police Station, Guwahati
+Date: 2024-02-14
+Registration Number: AS01BC4433
+FIR Number: AS-DSP-2024-0112
+Complainant: Bikram Das
+Make: Maruti Suzuki
+Model: WagonR
+Colour: Silky Silver
+Theft Status: STOLEN
+
+Vehicle stolen overnight from the apartment parking at Beltola. The complainant states the vehicle was not insured at the time of theft as the earlier policy had lapsed.

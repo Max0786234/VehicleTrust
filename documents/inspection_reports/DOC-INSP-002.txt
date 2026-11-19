@@ -1,0 +1,15 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+VEHICLE INSPECTION REPORT
+
+Document ID: DOC-INSP-002
+Document Type: Vehicle Inspection Report
+Issued By: Bajaj Allianz Survey Team
+Date: 2026-05-30
+Registration Number: KA05MJ5555
+Make: Maruti Suzuki
+Model: Swift
+Colour: Fire Red
+Owner: Deepak Hegde
+
+The vehicle has been repainted. Observed colour is Fire Red; the RC carries a colour change endorsement dated 2022-11-03. Original factory colour was Crimson Red.

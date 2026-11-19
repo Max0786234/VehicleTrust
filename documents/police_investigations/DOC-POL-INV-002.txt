@@ -1,0 +1,14 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+VEHICLE RECOVERY MEMO
+
+Document ID: DOC-POL-INV-002
+Document Type: Police Investigation Report
+Issued By: Koyambedu Police Station, Chennai
+Date: 2022-06-02
+Registration Number: TN 02 KK 6789
+FIR Number: TN-ANN-2022-0890
+Investigating Officer: SI R. Meena
+Theft Status: RECOVERED
+
+Vehicle recovered at Koyambedu market parking with fake number plates. Accused apprehended. Vehicle released to the owner after inspection on 2022-06-04.

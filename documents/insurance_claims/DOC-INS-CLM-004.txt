@@ -1,0 +1,17 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+TOTAL LOSS SETTLEMENT REPORT
+
+Document ID: DOC-INS-CLM-004
+Document Type: Insurance Claim Report
+Issued By: Oriental Insurance
+Date: 2019-10-30
+Registration Number: WB02K0001
+Claim Number: CLM-ORI-2019-0914
+Policy Number: POL-ORIENTAL-01
+Make: Mercedes-Benz
+Model: C-Class
+Colour: Obsidian Black
+Claim Status: SETTLED
+
+Vehicle submerged during flooding in Kolkata. Engine and electricals damaged beyond repair. Settled as a constructive total loss; the registration certificate must be surrendered on scrapping.

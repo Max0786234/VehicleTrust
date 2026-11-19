@@ -1,0 +1,6 @@
+# Normalise text files; never touch binary files
+* text=auto
+*.pdf binary
+*.png binary
+*.jpg binary
+*.db binary

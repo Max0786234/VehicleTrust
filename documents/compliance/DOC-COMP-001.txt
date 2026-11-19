@@ -1,0 +1,16 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+POLLUTION UNDER CONTROL CERTIFICATE
+
+Document ID: DOC-COMP-001
+Document Type: Compliance Certificate
+Issued By: Authorised PUC Centre, New Delhi
+Date: 2026-07-01
+Registration Number: DL01AB1234
+Make: Honda
+Model: City
+Fuel: Petrol
+Valid Until: 2027-01-01
+Result: PASS
+
+Emission levels within the prescribed limits.

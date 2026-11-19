@@ -1,0 +1,15 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+POST-RECOVERY INSPECTION REPORT
+
+Document ID: DOC-INSP-003
+Document Type: Vehicle Inspection Report
+Issued By: Chennai Police Motor Vehicle Inspector
+Date: 2022-06-04
+Registration Number: TN02KK6789
+Make: Tata
+Model: Altroz
+Colour: High Street Gold
+Related FIR: TN-ANN-2022-0890
+
+Recovered vehicle inspected. Fake number plates were fitted and have been removed. Chassis number verified against RTO records. Minor scratches on left doors; vehicle roadworthy.

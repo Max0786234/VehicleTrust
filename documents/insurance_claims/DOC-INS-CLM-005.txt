@@ -1,0 +1,15 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+CLAIM INTIMATION ACKNOWLEDGEMENT
+
+Document ID: DOC-INS-CLM-005
+Document Type: Insurance Claim Report
+Issued By: Reliance General Insurance
+Date: 2026-04-23
+Registration Number: AP09CA3322
+Claim Number: CLM-REL-2026-0422
+Policy Number: POL-RELIANCE-33A
+Claim Type: FLOOD_DAMAGE
+Claim Status: UNDER_REVIEW
+
+Flood damage claim registered. A second policy for the same vehicle (Cholamandalam POL-CHOLA-33B) was found during de-duplication checks; the claim is on hold pending clarification from the insured.

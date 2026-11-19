@@ -1,0 +1,17 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+FIRST INFORMATION REPORT - MOTOR VEHICLE THEFT
+
+Document ID: DOC-FIR-001
+Document Type: Theft Complaint
+Issued By: Navrangpura Police Station, Ahmedabad
+Date: 2023-08-10
+Registration Number: GJ-01-AB-7777
+FIR Number: GJ-NAV-2023-0457
+Complainant: Hitesh Patel
+Make: Mahindra
+Model: XUV700
+Colour: Everest White
+Theft Status: STOLEN
+
+The complainant parked the vehicle outside a shopping complex on C.G. Road at about 19:30 and found it missing at 22:40. Both keys are with the complainant.

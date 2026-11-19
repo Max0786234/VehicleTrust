@@ -1,0 +1,17 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+TOTAL LOSS SETTLEMENT REPORT
+
+Document ID: DOC-INS-CLM-003
+Document Type: Insurance Claim Report
+Issued By: Tata AIG General Insurance
+Date: 2024-03-28
+Registration Number: HP01CC2323
+Claim Number: CLM-TATA-2024-0305
+Policy Number: POL-TATA-2323
+Make: MG
+Model: Hector
+Claim Status: SETTLED
+Settlement Basis: Total loss
+
+Vehicle damaged beyond economical repair in a landslide on NH-5 near Shimla. Settled as a total loss; the salvage was retained by the owner, who undertook to deposit it at a registered scrapping facility.

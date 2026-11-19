@@ -1,0 +1,15 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+POLLUTION UNDER CONTROL CERTIFICATE
+
+Document ID: DOC-COMP-003
+Document Type: Compliance Certificate
+Issued By: Authorised PUC Centre, New Delhi
+Date: 2026-08-20
+Registration Number: DL08CZ1010
+Make: Hyundai
+Model: Exter
+Valid Until: 2027-02-20
+Result: PASS
+
+Emission levels within the prescribed limits. Owner: Aarav Sharma.

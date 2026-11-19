@@ -1,0 +1,16 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+E-CHALLAN: DRIVING WITHOUT VALID INSURANCE
+
+Document ID: DOC-COMP-002
+Document Type: Compliance Notice
+Issued By: Pune Traffic Police
+Date: 2024-03-15
+Registration Number: MH12DE1432
+Challan Number: ECH-MH12-2024-77812
+Make: Tata
+Model: Nexon
+Offence: Section 196 MV Act
+Insurance Status: EXPIRED
+
+Vehicle detected without valid insurance during the Maharashtra enforcement drive. Last policy POL-ICICI-2022 expired on 2023-08-09.

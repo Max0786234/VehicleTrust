@@ -1,0 +1,14 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+INVESTIGATION STATUS REPORT
+
+Document ID: DOC-POL-INV-003
+Document Type: Police Investigation Report
+Issued By: Dispur Police Station, Guwahati
+Date: 2025-03-01
+Registration Number: AS01BC4433
+FIR Number: AS-DSP-2024-0112
+Investigating Officer: SI Bikash Bora
+Status: DORMANT
+
+No leads after twelve months. Case kept open; vehicle details circulated to neighbouring states.

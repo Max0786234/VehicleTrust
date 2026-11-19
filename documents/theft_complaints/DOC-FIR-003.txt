@@ -1,0 +1,16 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+FIRST INFORMATION REPORT - MOTOR VEHICLE THEFT
+
+Document ID: DOC-FIR-003
+Document Type: Theft Complaint
+Issued By: Anna Nagar Police Station, Chennai
+Date: 2022-05-20
+Registration Number: TN02KK6789
+FIR Number: TN-ANN-2022-0890
+Complainant: Lakshmi Narayanan
+Make: Tata
+Model: Altroz
+Theft Status: STOLEN
+
+Vehicle stolen from street parking on 2nd Avenue, Anna Nagar.

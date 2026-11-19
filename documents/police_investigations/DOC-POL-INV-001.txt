@@ -1,0 +1,13 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+INVESTIGATION PROGRESS REPORT
+
+Document ID: DOC-POL-INV-001
+Issued By: Navrangpura Police Station, Ahmedabad
+Date: 2026-09-30
+FIR Number: GJ-NAV-2023-0457
+Investigating Officer: SI Harshad Patel
+Status: ACTIVE
+
+CCTV review shows the vehicle crossing the Gujarat-Rajasthan border on 2023-08-11. An ANPR camera at Shamlaji captured plate text GJO1AB7777, which is the stolen Mahindra XUV700 with a misread digit.
+The vehicle has not been recovered. An insurer enquiry in 2026 about a renewed policy for this vehicle has been noted; the RC remains suspended.

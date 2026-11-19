@@ -1,130 +1,157 @@
-# VehicleTrust
+# VehicleTrust AI 🛡️
+### Federated vehicle-record integration across independent databases
 
-VehicleTrust is a distributed information integration system designed to improve vehicle compliance checks by combining data from multiple independent sources into one trusted view.
+VehicleTrust AI answers questions such as *"Check the complete history of DL01AB1234"* or
+*"Is this vehicle insured, stolen or scrapped?"*. The information needed lives in **five independent
+databases** owned by different organisations and running on **two machines**. The system finds the
+vehicle in every database even when the registration number is noisy (for example read by OCR as
+`DLO1AB1234`), discovers related information through each database's own relationships, combines it,
+reports where the sources disagree, and adds supporting evidence from documents.
 
-The aim of this project is to match vehicle records across heterogeneous databases, resolve identity differences, and provide auditable decisions for roadside inspection and compliance verification.
+Developed as the course project for *Information Integration* (Phase 2: noisy plate matching and data
+cleansing; Phase 3: relational databases, federated query processing, unstructured data integration).
 
-## Source systems
+> All vehicles, people and documents in this repository are **synthetic demonstration data**.
+> The system is deterministic and explainable: edit-distance matching, rules and BM25 ranking.
 
-`database_setup.py` creates five isolated SQLite files with intentionally different key names and formats:
+---
 
-1. `road_capture`: roadside ANPR observations and vehicle descriptions.
-2. `insurance_policy`: insurer policy and validity data.
-3. `vehicle_registration`: authoritative registration and ownership data.
-4. `theft_scrap_case`: police theft and authorised dismantling cases.
-5. `ministry_report`: generated reports for the Ministry of Transportation.
+## Features
 
-The shared business identity is the vehicle registration number, but each source represents it differently (`plate_text`, `registration_no`, `reg_no`, and `plate`). The canonical view normalises case, spaces, and hyphens before matching. A VIN fragment is also available as a secondary theft match field.
+**Noisy plate matching and cleansing**
+- Plate image upload → OpenCV preprocessing → EasyOCR (optional)
+- Plate normalisation and OCR-confusion variants (`O/0`, `I/1`, `B/8`, `S/5`, `Z/2`, `G/6`)
+- Damerau-Levenshtein + RapidFuzz similarity, contextual scoring with make / model / colour / state / year
+- Canonical vehicle record, date-based insurance evaluation, conflict detection
+- Cleansing proposals backed by the Registration Authority; accept / reject / unresolved with stale-check and audit trail
 
-## Run it
+**Federated integration**
+- Five normalised SQLite databases (5–6 tables each) with enforced foreign keys and safe, id-preserving migration
+- Natural-language query understanding and decomposition to only the relevant databases
+- Parallel subqueries over REST with per-call deadlines and partial results when a service is down
+- Each database discovers related context through its own FK-PK relationships and returns the paths it followed
+- Cross-source entity resolution, context accumulation with provenance, cross-database conflict rules
+- Document repository (TXT / PDF / Markdown / HTML): extraction, metadata, chunking, BM25 index, and retrieval
+  driven by the facts found in the databases, with document-vs-database evidence checks
+- Streamlit dashboard showing every pipeline stage; two-machine launcher with health checks and packaging
 
-```bash
-python3 server.py
+---
+
+## Architecture
+
+```
+                 Machine 1                                          Machine 2
+ ┌──────────────────────────────────────────┐        ┌─────────────────────────────────┐
+ │ Streamlit :8501 ──► Gateway :8000        │  REST  │ Vehicle Registry       :8101    │
+ │   understanding · decomposition          │◄──────►│ Insurance Records      :8102    │
+ │   federation · context · retrieval       │  LAN   │ Registration Authority :8103    │
+ │ Theft & Scrapping :8104  Audit Log :8105 │        │ (own SQLite files)              │
+ │ documents/ (document repository)         │        └─────────────────────────────────┘
+ └──────────────────────────────────────────┘
 ```
 
-The report decisions are:
+**Query pipeline:** user query → query understanding → query decomposition → parallel federated execution →
+local FK-PK context discovery → entity resolution → audit subquery → context accumulation →
+structured integration and conflict detection → context-driven document retrieval → final answer with sources.
 
-- `CLEAR`: valid registration and active policy at capture time.
-- `INSURANCE_EXPIRED`: a policy exists but is not active on the capture date.
-- `UNINSURED`: no policy matched the registered vehicle.
-- `STOP_AND_REPORT`: an open theft case matched the vehicle.
-- `REGISTRATION_REVIEW`: the registration exists but is not valid.
-- `UNRESOLVED_IDENTITY`: the observation could not be matched to an authoritative registration.
+| Database | Service | Port | Tables |
+|---|---|---|---|
+| Vehicle Registry | `service_registry.py` | 8101 | vehicles, vehicle_models, manufacturers, vehicle_categories, vehicle_owners |
+| Insurance Records | `service_insurance.py` | 8102 | insurance_policies, insurance_providers, policy_holders, coverage_details, insurance_claims |
+| Registration Authority | `service_registration.py` | 8103 | rto_registrations, rto_offices, registration_certificates, ownership_transfers, registration_events |
+| Theft & Scrapping | `service_theft.py` | 8104 | theft_scrapping_records, theft_reports, police_stations, investigation_details, recovery_records, scrapping_records |
+| Cleansing Audit Log | `service_audit.py` | 8105 | cleansing_audit_log, reviewers, audit_sessions, audit_evidence, data_change_history |
 
-## Trust and integration notes
+Foreign keys connect tables **inside** each database. Databases are linked to each other only through shared
+identifiers (registration number, record ids, policy / FIR / RC numbers) over HTTP — never by opening another
+machine's database file.
 
-- Raw source rows are retained; the canonical view never overwrites evidence.
-- Every decision includes `decision_reason`, source identifiers, capture time, and camera ID.
-- The gateway requests source snapshots over HTTP at query time; it does not open or merge remote database files.
-- The sample data intentionally includes a capture-only vehicle to make unresolved identity explicit instead of silently treating it as uninsured.
-- Production use would require authenticated source ingestion, schema/version metadata, encryption and access controls, retention rules, human review for high-impact actions, and a stronger identity-resolution model with confidence scores.
+---
 
-## Roadside webpage
+## Technology
 
-The interface is a dependency-free field inspection prototype served by the local API with:
+Python · FastAPI · Uvicorn · SQLAlchemy 2 · SQLite · httpx (async) · RapidFuzz · pypdf · Streamlit · pandas ·
+OpenCV · EasyOCR (optional) · pytest
 
-- live-style ANPR capture context and recent detections;
-- plate lookup across the seeded vehicle states;
-- clear, expired, uninsured, stolen, and unresolved decisions;
-- source-by-source vehicle evidence; and
-- Ministry reporting and inspection-hold actions with visible confirmation.
+---
 
-For the database-backed version, start the localhost service instead:
-
-```bash
-python3 source_service.py --source capture --host 0.0.0.0 --port 8101
-python3 source_service.py --source insurance --host 0.0.0.0 --port 8102
-python3 source_service.py --source registry --host 0.0.0.0 --port 8103
-python3 source_service.py --source cases --host 0.0.0.0 --port 8104
-python3 source_service.py --source ministry --host 0.0.0.0 --port 8105
-python3 server.py
-```
-
-Then open `http://localhost:8000`. In deployment, run each `source_service.py` process on the laptop that owns that source database. The gateway fetches snapshots and forwards writes over HTTP; it does not open or attach the remote database files.
-
-Set known laptop addresses on the gateway with environment variables before starting it:
-
-```bash
-CAPTURE_URL=http://192.168.1.21:8101 \
-INSURANCE_URL=http://192.168.1.22:8102 \
-REGISTRY_URL=http://192.168.1.23:8103 \
-CASES_URL=http://192.168.1.24:8104 \
-MINISTRY_URL=http://192.168.1.25:8105 \
-python3 server.py
-```
-
-## Three-laptop deployment
-
-Use three identical copies of this project folder. The copies contain the same code, but each source database is owned and changed by only one laptop. Do not open or copy another laptop's `.db` file.
-
-Example allocation:
-
-| Laptop | Run | Database owner |
-| --- | --- | --- |
-| 1 | `capture` and `insurance` source services | `source_databases/road_capture.db`, `insurance.db` |
-| 2 | `registry` and `cases` source services | `source_databases/registry.db`, `cases.db` |
-| 3 | `ministry` source service and the gateway | `source_databases/ministry.db` and the web UI |
-
-On the master copy, run `python database_setup.py` once to create all five databases with the current schema. Copy this complete project folder, including the initialized `source_databases` folder, to the three laptops. Do not run `database_setup.py` on the destination laptops after copying, because it resets all five databases. Starting `source_service.py` later does not reset an existing database, so inserts and deletes survive service restarts.
-
-The Manage data page now uses numeric controls for integer IDs, date controls for date fields, date-time controls for timestamps, dropdowns for status/type/severity values, and marks database-required fields with `*`. SQLite stores dates as ISO text (`YYYY-MM-DD` or `YYYY-MM-DDTHH:MM:SS`) because SQLite has no native date type; the application controls the input format.
-
-Laptop 1:
+## Quick start (one machine, all five databases)
 
 ```powershell
-python source_service.py --source capture --host 0.0.0.0 --port 8101
-python source_service.py --source insurance --host 0.0.0.0 --port 8102
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-ocr.txt      # optional: plate-image OCR (installs PyTorch)
+python start_node.py all
 ```
 
-Laptop 2:
+- Dashboard: **http://127.0.0.1:8501** → *0. Federated Query*
+- Gateway web UI: http://127.0.0.1:8000 · API docs: http://127.0.0.1:8000/docs
+
+Databases are created and seeded automatically on first start (non-destructive afterwards).
+`python start_node.py init all --reset` recreates them from the seed data after taking a backup.
+
+## Two machines
 
 ```powershell
-python source_service.py --source registry --host 0.0.0.0 --port 8103
-python source_service.py --source cases --host 0.0.0.0 --port 8104
+# Machine 2
+python start_node.py init machine-2
+python start_node.py machine-2
+
+# Machine 1
+python start_node.py configure machine-1 --machine2-ip <MACHINE2_IP>
+python start_node.py check
+python start_node.py machine-1
 ```
 
-Laptop 3:
+`python start_node.py package machine-2` creates a clean copy of the project for the second machine.
+Firewall rules, troubleshooting and the optional dashboard on machine 2 are described in
+[`docs/DISTRIBUTED_SETUP.md`](docs/DISTRIBUTED_SETUP.md).
+
+## Example queries
+
+| Query | What it shows |
+|---|---|
+| `Check the complete history of vehicle DL01AB1234.` | all five databases, FK context, documents |
+| `Find vehicles with registration numbers similar to DLO1AB1234` | noisy plate resolved to DL01AB1234 |
+| `Find the ownership history and insurance details for UP16BT9900` | registry owner vs RTO transfer conflict |
+| `Is this vehicle insured, stolen or scrapped? GJ 01 AB 7777` | theft report, policy renewed after theft |
+| `Is WB02K0001 scrapped?` | scrapped vehicle whose RC is still valid |
+| `Show the full history and audit trail of KA05MJ5555` | colour conflict, RTO explanation, cleansing proposal |
+
+## Tests
 
 ```powershell
-python source_service.py --source ministry --host 0.0.0.0 --port 8105
-$env:GATEWAY_HOST = "0.0.0.0"
-$env:CAPTURE_URL = "http://LAPTOP1-IP:8101"
-$env:INSURANCE_URL = "http://LAPTOP1-IP:8102"
-$env:REGISTRY_URL = "http://LAPTOP2-IP:8103"
-$env:CASES_URL = "http://LAPTOP2-IP:8104"
-$env:MINISTRY_URL = "http://LAPTOP3-IP:8105"
-python server.py
+python -m pytest -q
 ```
 
-Replace the three `LAPTOP*-IP` values with the LAN IPv4 addresses shown by `ipconfig`. Open `http://LAPTOP3-IP:8000` from any laptop on the same LAN. Allow Python through the private-network firewall, and keep ports 8000 and 8101-8105 available.
+122 tests: matching and cleansing regression, schemas / FK enforcement / migration, federation (parallelism,
+timeouts, outages, conflicts), document retrieval, launcher, and a real-process simulation of the two-machine split.
 
-There should be three folders, one per laptop, rather than three different codebases or three different database copies. Only the source service that owns a database writes it. A change made in the UI is sent to that owner over HTTP; the next lookup requests fresh snapshots from all five owners, so the change is visible to every user immediately. Changes made directly in a database file will not appear safely until the owning service is running, so use the UI/API for shared updates.
+---
 
-For local development, the default URLs are `127.0.0.1:8101` through `127.0.0.1:8105`, which simulate five independent machines as five independent processes.
+## Project structure
 
-The site has four pages:
+```
+config.py              topology, ports, URLs, database paths (reads .env)
+start_node.py          launcher: machine-1 | machine-2 | all | frontend | init | check | configure | package
+run_all.py             shortcut for 'start_node.py all'
+databases/             the five database modules (models, migration, FK expansion) + service factory
+service_*.py           the five FastAPI database services
+gateway.py             API gateway + HTML web UI (frontend/index.html)
+query_engine.py        query understanding and decomposition
+federation.py          federated execution, entity resolution, context accumulation, integration, answer
+retrieval.py           document processing, BM25 index, context-driven retrieval
+matching.py            plate normalisation, OCR variants, Damerau-Levenshtein, contextual scoring, benchmark
+integration.py         canonical record, insurance rules, cleansing proposals and decisions
+seed_data.py           synthetic data for all five databases
+app.py, ui_phase3.py   Streamlit dashboard
+documents/             synthetic document repository + generate_documents.py
+docs/                  DISTRIBUTED_SETUP.md, MATCHING_JUSTIFICATION.md, CODE_MODIFICATIONS.md
+tests/                 pytest suite
+```
 
-- `index.html`: roadside inspection and vehicle history.
-- `help.html`: project explanation and live schema metadata from SQLite `PRAGMA`.
-- `sql.html`: read-only `SELECT` or `WITH` queries across the attached databases, capped at 200 rows.
-- `data.html`: source/action dropdowns that generate visible `INSERT` or `DELETE` SQL and execute only after confirmation.
+## Known limitations
+
+- Query understanding uses keyword rules; unusual wording falls back to a general status check.
+- Fuzzy matching scans each database's vehicle table — suitable for the demonstration dataset, not for millions of rows.
+- Document retrieval is lexical (BM25); scanned image-only PDFs are not OCR'd.
+- Services trust the local network (no authentication between services).

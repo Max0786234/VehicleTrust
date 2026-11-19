@@ -1,3 +1,26 @@
-source_databases/
+# Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+linux_venv/
+
+# Editors
+.vscode/
+.idea/
+
+# Local configuration (create with: python start_node.py configure ...)
+.env
+.env.bak
+
+# Runtime data: databases are created from seed data by 'python start_node.py init'
+*.db
+*.db-journal
+backups/
+dist/
+
+# Generated guides
+docs/*.pdf

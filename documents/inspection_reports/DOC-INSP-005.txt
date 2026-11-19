@@ -1,0 +1,15 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+VEHICLE INSPECTION REPORT
+
+Document ID: DOC-INSP-005
+Document Type: Vehicle Inspection Report
+Issued By: Delhi Pre-Owned Car Evaluators
+Date: 2026-02-11
+Registration Number: DL01AB1243
+Make: Maruti Suzuki
+Model: Alto
+Colour: Grey
+Owner: Sunil Kumar
+
+Routine inspection of a Maruti Suzuki Alto registered in Delhi. Note: this registration number differs from DL01AB1234 only by two transposed digits, and the vehicle is a different car.

@@ -1,0 +1,17 @@
+SYNTHETIC DEMONSTRATION DOCUMENT - VehicleTrustAI coursework data. Not a real record.
+
+POLICY CANCELLATION NOTICE
+
+Document ID: DOC-INS-CNL-001
+Document Type: Insurance Cancellation Notice
+Issued By: ICICI Lombard
+Date: 2023-11-20
+Registration Number: DL03CC8899
+Policy Number: POL-ICICI-8899B
+Insured Name: Farhan Qureshi
+Make: Maruti Suzuki
+Model: Dzire
+Policy Status: CANCELLED
+
+The policy is cancelled with effect from 2023-11-20 because the premium instalment was dishonoured.
+The vehicle is not insured by this company from the cancellation date. Any loss after this date is not payable.
