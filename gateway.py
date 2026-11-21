@@ -376,6 +376,9 @@ def _warm_up() -> None:
         from retrieval import get_store
         _ssl_context()
         get_store()
+        import threading
+        from llm_understanding import warm_up_model
+        threading.Thread(target=warm_up_model, daemon=True).start()
     except Exception as exc:  # never block startup; the error resurfaces on use
         print(f"[Gateway] warm-up skipped: {exc}")
 
@@ -405,6 +408,7 @@ class FederatedQueryRequest(BaseModel):
     include_documents: bool = True
     top_k_documents: int = 6
     timeout: Optional[float] = None
+    use_llm: Optional[bool] = None  # None = follow LLM_UNDERSTANDING in .env
 
 
 @app.post("/api/federated-query")
@@ -414,15 +418,22 @@ async def federated_query(req: FederatedQueryRequest):
     return await run_federated_query(
         req.query, plate=req.plate, context=context, plate_source=req.plate_source,
         urls=_all_service_urls(), timeout=req.timeout, include_documents=req.include_documents,
-        top_k_documents=max(1, min(req.top_k_documents, 15)))
+        top_k_documents=max(1, min(req.top_k_documents, 15)), use_llm=req.use_llm)
 
 
 @app.post("/api/query/understand")
-def understand(req: FederatedQueryRequest):
-    from query_engine import decompose_query, understand_query
+async def understand(req: FederatedQueryRequest):
+    from llm_understanding import understand_with_llm
+    from query_engine import decompose_query
     context = {k: getattr(req, k) for k in ("make", "model", "colour", "state") if getattr(req, k)}
-    u = understand_query(req.query, req.plate, context, req.plate_source)
+    u = await understand_with_llm(req.query, req.plate, context, req.plate_source, use_llm=req.use_llm)
     return {"understanding": u, "decomposition": decompose_query(u)}
+
+
+@app.get("/api/llm/status")
+async def llm_status():
+    from llm_understanding import ollama_status
+    return await ollama_status()
 
 
 @app.get("/api/topology")

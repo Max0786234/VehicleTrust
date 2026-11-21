@@ -1,0 +1,17 @@
+.git
+.env
+.env.bak
+.venv
+venv
+linux_venv
+__pycache__
+*.pyc
+.pytest_cache
+.vscode
+.idea
+backups
+dist
+*.db
+*.db-journal
+docs/*.pdf
+CLAUDE.md

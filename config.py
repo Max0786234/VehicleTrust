@@ -64,6 +64,8 @@ GATEWAY_PORT = int(os.getenv("GATEWAY_PORT", "8000"))
 STREAMLIT_PORT = int(os.getenv("STREAMLIT_PORT", "8501"))
 FEDERATION_TIMEOUT = float(os.getenv("FEDERATION_TIMEOUT", "4.0"))
 DOCUMENTS_DIR = os.getenv("DOCUMENTS_DIR", os.path.join(BASE_DIR, "documents"))
+# Hosted single-container demo (Hugging Face Space): OCR off, record editing read-only.
+DEMO_MODE = os.getenv("VEHICLETRUST_DEMO", "").strip().lower() in ("1", "true", "yes")
 
 
 def service_port(key: str) -> int:

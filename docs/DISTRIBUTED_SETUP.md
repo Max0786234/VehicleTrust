@@ -78,6 +78,17 @@ Optional, to let the teammate open your dashboard (Administrator):
 New-NetFirewallRule -DisplayName "VehicleTrust Laptop1 UI" -Direction Inbound -Protocol TCP -LocalPort 8000,8501 -Action Allow -Profile Private,Domain
 ```
 
+### Optional: local LLM for query understanding (Laptop 1)
+The gateway runs on Laptop 1, so only Laptop 1 needs Ollama. Install it from https://ollama.com (Windows
+installer; it runs in the background on port 11434), then:
+```powershell
+ollama pull llama3.2               # ~2 GB, once
+python start_node.py check         # last line: LLM (Ollama)  llama3.2  ready
+```
+`configure machine-1` already writes `LLM_UNDERSTANDING=auto`, `OLLAMA_URL` and `OLLAMA_MODEL` to `.env`. If Ollama
+is not running, queries use the rule-based parser automatically; set `LLM_UNDERSTANDING=off` to disable it.
+The first question after starting loads the model (the gateway pre-loads it in the background at startup).
+
 ## 4. Verify the connection (on Laptop 1)
 ```powershell
 Test-NetConnection 192.168.1.50 -Port 8101         # TcpTestSucceeded : True

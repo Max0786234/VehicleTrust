@@ -1,0 +1,970 @@
+{
+ "summary": {
+  "method": "rules",
+  "model": null,
+  "cases": 45,
+  "plate_accuracy": 1.0,
+  "intent_accuracy": 0.8,
+  "must_intent_recall": 0.8888888888888888,
+  "right_databases": 0.8888888888888888,
+  "avg_extra_databases": 0.15555555555555556,
+  "fell_back_to_rules": 0,
+  "median_ms": 1
+ },
+ "rows": [
+  {
+   "q": "Check the complete history of vehicle DL01AB1234.",
+   "expected_plate": "DL01AB1234",
+   "predicted_plate": "DL01AB1234",
+   "must": [
+    "FULL_HISTORY"
+   ],
+   "predicted": [
+    "FULL_HISTORY"
+   ],
+   "method": "rules",
+   "ms": 3,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Can you dig up everything you have on DL01AB1234?",
+   "expected_plate": "DL01AB1234",
+   "predicted_plate": "DL01AB1234",
+   "must": [
+    "FULL_HISTORY"
+   ],
+   "predicted": [
+    "FULL_HISTORY"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "I want a full background check on MH12DE1432 before I buy it",
+   "expected_plate": "MH12DE1432",
+   "predicted_plate": "MH12DE1432",
+   "must": [
+    "FULL_HISTORY"
+   ],
+   "predicted": [
+    "FULL_HISTORY"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Is DL01AB1234 insured?",
+   "expected_plate": "DL01AB1234",
+   "predicted_plate": "DL01AB1234",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "does KA05MJ5555 have valid insurance right now",
+   "expected_plate": "KA05MJ5555",
+   "predicted_plate": "KA05MJ5555",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "my cousin says his car TN09AZ4321 is covered, can you confirm the policy is active?",
+   "expected_plate": "TN09AZ4321",
+   "predicted_plate": "TN09AZ4321",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE",
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 1.0,
+   "extra": [
+    "THEFT"
+   ],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": [
+    "theft_scrapping"
+   ]
+  },
+  {
+   "q": "has any claim ever been made on HR26DK8392?",
+   "expected_plate": "HR26DK8392",
+   "predicted_plate": "HR26DK8392",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "bhai MH 12 DE 1432 ka insurance chal raha hai ya expire ho gaya?",
+   "expected_plate": "MH12DE1432",
+   "predicted_plate": "MH12DE1432",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE"
+   ],
+   "method": "rules",
+   "ms": 2,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Is GJ01AB7777 stolen?",
+   "expected_plate": "GJ01AB7777",
+   "predicted_plate": "GJ01AB7777",
+   "must": [
+    "THEFT"
+   ],
+   "predicted": [
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "was AS01BC4433 ever reported missing to the police?",
+   "expected_plate": "AS01BC4433",
+   "predicted_plate": "AS01BC4433",
+   "must": [
+    "THEFT"
+   ],
+   "predicted": [
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "I saw a car with plate TN 02 KK 6789 parked for days, was it ever stolen and found again?",
+   "expected_plate": "TN02KK6789",
+   "predicted_plate": "TN02KK6789",
+   "must": [
+    "THEFT"
+   ],
+   "predicted": [
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "is there any FIR registered against GJ-01-AB-7777",
+   "expected_plate": "GJ01AB7777",
+   "predicted_plate": "GJ01AB7777",
+   "must": [
+    "THEFT"
+   ],
+   "predicted": [
+    "THEFT",
+    "REGISTRATION"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 1.0,
+   "extra": [
+    "REGISTRATION"
+   ],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": [
+    "registration_authority"
+   ]
+  },
+  {
+   "q": "Is WB02K0001 scrapped?",
+   "expected_plate": "WB02K0001",
+   "predicted_plate": "WB02K0001",
+   "must": [
+    "SCRAPPING"
+   ],
+   "predicted": [
+    "SCRAPPING"
+   ],
+   "method": "rules",
+   "ms": 3,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "has HP01CC2323 been sent to the junkyard or written off?",
+   "expected_plate": "HP01CC2323",
+   "predicted_plate": "HP01CC2323",
+   "must": [
+    "SCRAPPING"
+   ],
+   "predicted": [
+    "SCRAPPING"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Was GJ 01 AB 7777 ever taken off the road for good or reported missing?",
+   "expected_plate": "GJ01AB7777",
+   "predicted_plate": "GJ01AB7777",
+   "must": [
+    "SCRAPPING",
+    "THEFT"
+   ],
+   "predicted": [
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 0.5,
+   "extra": [],
+   "missed": [
+    "SCRAPPING"
+   ],
+   "dbs_ok": false,
+   "extra_dbs": []
+  },
+  {
+   "q": "Is this vehicle insured, stolen or scrapped? GJ 01 AB 7777",
+   "expected_plate": "GJ01AB7777",
+   "predicted_plate": "GJ01AB7777",
+   "must": [
+    "INSURANCE",
+    "THEFT",
+    "SCRAPPING"
+   ],
+   "predicted": [
+    "INSURANCE",
+    "THEFT",
+    "SCRAPPING"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Who owns UP16BT9900?",
+   "expected_plate": "UP16BT9900",
+   "predicted_plate": "UP16BT9900",
+   "must": [
+    "OWNERSHIP"
+   ],
+   "predicted": [
+    "OWNERSHIP"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "how many times has KA01HG4321 changed hands?",
+   "expected_plate": "KA01HG4321",
+   "predicted_plate": "KA01HG4321",
+   "must": [
+    "OWNERSHIP"
+   ],
+   "predicted": [
+    "AUDIT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 0.0,
+   "extra": [
+    "AUDIT"
+   ],
+   "missed": [
+    "OWNERSHIP"
+   ],
+   "dbs_ok": false,
+   "extra_dbs": [
+    "audit_log"
+   ]
+  },
+  {
+   "q": "My dad is buying UP 16 BT 9900 from a guy on OLX, is the seller really the registered owner?",
+   "expected_plate": "UP16BT9900",
+   "predicted_plate": "UP16BT9900",
+   "must": [
+    "OWNERSHIP"
+   ],
+   "predicted": [
+    "OWNERSHIP",
+    "REGISTRATION"
+   ],
+   "method": "rules",
+   "ms": 3,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Hey, my friend is selling me his Toyota UP 16 BT 9900, can you check whether he's actually the person it's registered to, and if the car is still covered by insurance?",
+   "expected_plate": "UP16BT9900",
+   "predicted_plate": "UP16BT9900",
+   "must": [
+    "OWNERSHIP",
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE",
+    "REGISTRATION"
+   ],
+   "method": "rules",
+   "ms": 3,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 0.5,
+   "extra": [],
+   "missed": [
+    "OWNERSHIP"
+   ],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Find the ownership history and insurance details for UP16BT9900",
+   "expected_plate": "UP16BT9900",
+   "predicted_plate": "UP16BT9900",
+   "must": [
+    "OWNERSHIP",
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE",
+    "OWNERSHIP"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "is the RC of WB02K0001 still valid?",
+   "expected_plate": "WB02K0001",
+   "predicted_plate": "WB02K0001",
+   "must": [
+    "REGISTRATION"
+   ],
+   "predicted": [
+    "REGISTRATION"
+   ],
+   "method": "rules",
+   "ms": 3,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "which RTO registered DL03CC8899 and when?",
+   "expected_plate": "DL03CC8899",
+   "predicted_plate": "DL03CC8899",
+   "must": [
+    "REGISTRATION"
+   ],
+   "predicted": [
+    "REGISTRATION"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "has the registration certificate of AS01BC4433 been suspended?",
+   "expected_plate": "AS01BC4433",
+   "predicted_plate": "AS01BC4433",
+   "must": [
+    "REGISTRATION"
+   ],
+   "predicted": [
+    "REGISTRATION"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "What car is KL07BQ8899? make and model please",
+   "expected_plate": "KL07BQ8899",
+   "predicted_plate": "KL07BQ8899",
+   "must": [
+    "VEHICLE_DETAILS"
+   ],
+   "predicted": [
+    "VEHICLE_DETAILS"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "what colour is TS07EA4455 supposed to be",
+   "expected_plate": "TS07EA4455",
+   "predicted_plate": "TS07EA4455",
+   "must": [
+    "VEHICLE_DETAILS"
+   ],
+   "predicted": [
+    "VEHICLE_DETAILS"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Find vehicles with registration numbers similar to DLO1AB1234",
+   "expected_plate": "DLO1AB1234",
+   "predicted_plate": "DLO1AB1234",
+   "must": [
+    "SIMILARITY"
+   ],
+   "predicted": [
+    "SIMILARITY"
+   ],
+   "method": "rules",
+   "ms": 4,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "are there other cars with plates that look like DL01AB1234?",
+   "expected_plate": "DL01AB1234",
+   "predicted_plate": "DL01AB1234",
+   "must": [
+    "SIMILARITY"
+   ],
+   "predicted": [
+    "SIMILARITY"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "something feels off about KA05MJ5555, the colour on the papers doesn't match what I see",
+   "expected_plate": "KA05MJ5555",
+   "predicted_plate": "KA05MJ5555",
+   "must": [
+    "DISCREPANCY"
+   ],
+   "predicted": [
+    "VEHICLE_DETAILS"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 0.0,
+   "extra": [],
+   "missed": [
+    "DISCREPANCY"
+   ],
+   "dbs_ok": false,
+   "extra_dbs": []
+  },
+  {
+   "q": "do the databases disagree about anything for BR01XY6655?",
+   "expected_plate": "BR01XY6655",
+   "predicted_plate": "BR01XY6655",
+   "must": [
+    "DISCREPANCY"
+   ],
+   "predicted": [
+    "GENERAL_STATUS"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 0.0,
+   "extra": [
+    "GENERAL_STATUS"
+   ],
+   "missed": [
+    "DISCREPANCY"
+   ],
+   "dbs_ok": false,
+   "extra_dbs": [
+    "theft_scrapping"
+   ]
+  },
+  {
+   "q": "find any mismatch in the records of KL07BQ8899",
+   "expected_plate": "KL07BQ8899",
+   "predicted_plate": "KL07BQ8899",
+   "must": [
+    "DISCREPANCY"
+   ],
+   "predicted": [
+    "DISCREPANCY"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "has anyone fiddled with the records of KA05MJ5555 in the past?",
+   "expected_plate": "KA05MJ5555",
+   "predicted_plate": "KA05MJ5555",
+   "must": [
+    "AUDIT"
+   ],
+   "predicted": [
+    "GENERAL_STATUS"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 0.0,
+   "extra": [
+    "GENERAL_STATUS"
+   ],
+   "missed": [
+    "AUDIT"
+   ],
+   "dbs_ok": false,
+   "extra_dbs": [
+    "insurance_records",
+    "theft_scrapping"
+   ]
+  },
+  {
+   "q": "show the audit trail for KL07BQ8899",
+   "expected_plate": "KL07BQ8899",
+   "predicted_plate": "KL07BQ8899",
+   "must": [
+    "AUDIT"
+   ],
+   "predicted": [
+    "AUDIT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "were any corrections made to the data of KA05MJ5555 and who approved them?",
+   "expected_plate": "KA05MJ5555",
+   "predicted_plate": "KA05MJ5555",
+   "must": [
+    "AUDIT"
+   ],
+   "predicted": [
+    "AUDIT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Show the full history and audit trail of KA05MJ5555",
+   "expected_plate": "KA05MJ5555",
+   "predicted_plate": "KA05MJ5555",
+   "must": [
+    "FULL_HISTORY",
+    "AUDIT"
+   ],
+   "predicted": [
+    "FULL_HISTORY",
+    "AUDIT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "is DLO1AB1234 insured",
+   "expected_plate": "DLO1AB1234",
+   "predicted_plate": "DLO1AB1234",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE"
+   ],
+   "method": "rules",
+   "ms": 4,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "check insurence of 22 BH 1234 AA",
+   "expected_plate": "22BH1234AA",
+   "predicted_plate": "22BH1234AA",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "stolen? MH02BW9000",
+   "expected_plate": "MH02BW9000",
+   "predicted_plate": "MH02BW9000",
+   "must": [
+    "THEFT"
+   ],
+   "predicted": [
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "tell me about DL08CZ1010",
+   "expected_plate": "DL08CZ1010",
+   "predicted_plate": "DL08CZ1010",
+   "must": [],
+   "predicted": [
+    "GENERAL_STATUS"
+   ],
+   "method": "rules",
+   "ms": 2,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Is the white Honda City DL01AB1234 in Delhi insured?",
+   "expected_plate": "DL01AB1234",
+   "predicted_plate": "DL01AB1234",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "Is the Mahindra XUV700 in Gujarat stolen?",
+   "expected_plate": "",
+   "predicted_plate": "",
+   "must": [
+    "THEFT"
+   ],
+   "predicted": [
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "who is the insurer and who is the owner of AP09CA3322, and are there two policies on it?",
+   "expected_plate": "AP09CA3322",
+   "predicted_plate": "AP09CA3322",
+   "must": [
+    "INSURANCE",
+    "OWNERSHIP"
+   ],
+   "predicted": [
+    "INSURANCE",
+    "OWNERSHIP"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "before I lend money against PB10AB5050, is it clean - not stolen, not scrapped, insured?",
+   "expected_plate": "PB10AB5050",
+   "predicted_plate": "PB10AB5050",
+   "must": [
+    "THEFT",
+    "SCRAPPING",
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE",
+    "THEFT",
+    "SCRAPPING"
+   ],
+   "method": "rules",
+   "ms": 2,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  },
+  {
+   "q": "police stopped CG04FF7878 without insurance papers, is it insured or not",
+   "expected_plate": "CG04FF7878",
+   "predicted_plate": "CG04FF7878",
+   "must": [
+    "INSURANCE"
+   ],
+   "predicted": [
+    "INSURANCE",
+    "THEFT"
+   ],
+   "method": "rules",
+   "ms": 1,
+   "plate_ok": true,
+   "intents_ok": false,
+   "must_recall": 1.0,
+   "extra": [
+    "THEFT"
+   ],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": [
+    "theft_scrapping"
+   ]
+  },
+  {
+   "q": "hello, can you help me?",
+   "expected_plate": "",
+   "predicted_plate": "",
+   "must": [],
+   "predicted": [
+    "GENERAL_STATUS"
+   ],
+   "method": "rules",
+   "ms": 0,
+   "plate_ok": true,
+   "intents_ok": true,
+   "must_recall": 1.0,
+   "extra": [],
+   "missed": [],
+   "dbs_ok": true,
+   "extra_dbs": []
+  }
+ ]
+}

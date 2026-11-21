@@ -1,5 +1,7 @@
 """Phase 3 Streamlit pages (imported by app.py): federated query pipeline, schema explorer,
 document repository. All data comes from the gateway REST API (GATEWAY_URL, default :8000)."""
+import os
+import time
 from typing import Any, Dict, List
 
 import httpx
@@ -7,6 +9,8 @@ import pandas as pd
 import streamlit as st
 
 import config
+import ui_theme as ui
+from ui_theme import escape
 
 EXAMPLES = [
     "Check the complete history of vehicle DL01AB1234.",
@@ -20,12 +24,12 @@ EXAMPLES = [
 PIPELINE = ["User Query", "Query Understanding", "Query Decomposition", "Federated Execution", "Local Context Discovery",
             "Context Accumulation", "Unstructured Retrieval", "Structured + Unstructured Integration", "Final Answer"]
 KIND_STYLE = {
-    "database_fact": ("🗄️", "Database fact"), "assessment": ("🛡️", "Rule-based assessment"),
-    "document_evidence": ("📄", "Document evidence"), "conflict": ("⚠️", "Conflict"),
-    "missing": ("❓", "Missing information"), "resolution": ("🔎", "Entity resolution"),
+    "database_fact": ("blue", "Database fact"), "assessment": ("violet", "Assessment"),
+    "document_evidence": ("green", "Document evidence"), "conflict": ("amber", "Conflict"),
+    "missing": ("gray", "Missing"), "resolution": ("blue", "Entity resolution"),
 }
-STATUS_BADGE = {"ok": "🟢 ok", "timeout": "🟠 timeout", "unavailable": "🔴 unavailable", "error": "🔴 error",
-                "not_called": "⚪ not called"}
+STATUS_BADGE = {"ok": "ok", "timeout": "timeout", "unavailable": "unavailable", "error": "error",
+                "not_called": "not called"}
 WAVE_COLORS = ["#2a78d6", "#eb6834"]  # categorical slots 1-2 (validated adjacent pair)
 
 
@@ -46,7 +50,8 @@ def _get(path: str, params=None, timeout: float = 15.0):
 
 
 def _fk_graph(paths: List[Dict[str, Any]]) -> str:
-    lines = ['digraph G { rankdir=LR; node [shape=box, style="rounded", fontsize=10]; edge [fontsize=8];']
+    lines = ['digraph G { rankdir=LR; bgcolor="transparent"; node [shape=box, style="rounded,filled", fillcolor="#ffffff", '
+             'color="#9fb0c6", fontname="Helvetica", fontsize=10]; edge [fontsize=8, color="#8a99ad", fontname="Helvetica"];']
     seen = set()
     for p in paths:
         a, b = p["from"], p["to"]
@@ -76,17 +81,16 @@ def _pipeline_strip(result: Dict[str, Any]) -> None:
         "Structured + Unstructured Integration": find("Cross-Database Integration"),
         "Final Answer": find("Structured + Unstructured Integration"),
     }
-    cols = st.columns(len(PIPELINE))
-    for col, name in zip(cols, PIPELINE):
-        s = mapping.get(name)
-        done = s is not None
-        with col:
-            st.markdown(
-                f"<div style='border:1px solid {'#2a78d6' if done else '#bbb'};border-radius:8px;padding:6px;"
-                f"min-height:118px;font-size:0.78rem'><b>{'✅' if done else '⏸️'} {name}</b><br>"
-                f"<span style='opacity:.75'>{(str(s['ms']) + ' ms') if done else 'not reached'}</span><br>"
-                f"<span style='opacity:.85'>{(s or {}).get('detail', '')[:95]}</span></div>",
-                unsafe_allow_html=True)
+    html = []
+    for i, name in enumerate(PIPELINE):
+        stage = mapping.get(name)
+        done = stage is not None
+        detail = escape(str((stage or {}).get("detail", "")).replace(",", ", ").replace(";", "; ")[:120])
+        ms = f"{stage['ms']} ms" if done else "not reached"
+        html.append(f"<div class='vt-step{'' if done else ' pending'}'><div class='vt-step-num'>{i + 1:02d}</div>"
+                    f"<div class='vt-step-name'>{name}</div><div class='vt-step-ms'>{ms}</div>"
+                    f"<div class='vt-step-detail'>{detail}</div></div>")
+    st.markdown(f"<div class='vt-steps' style='--vt-cols:{len(PIPELINE)}'>" + "".join(html) + "</div>", unsafe_allow_html=True)
 
 
 def _timeline_chart(calls: List[Dict[str, Any]]) -> None:
@@ -110,70 +114,106 @@ def _timeline_chart(calls: List[Dict[str, Any]]) -> None:
     st.caption("Each wave starts at 0 ms. Overlapping wave-1 bars show the subqueries ran concurrently (asyncio.gather).")
 
 
+def _llm_disabled() -> bool:
+    return os.getenv("LLM_UNDERSTANDING", "auto").strip().lower() == "off"
+
+
 def render_federated_query() -> None:
-    st.header("🌐 Phase 3 — Federated Query Processing")
-    st.caption(f"Gateway: `{gateway()}` · the gateway decomposes the query, sends subqueries to the independent "
-               "database services over REST, accumulates FK-PK context and retrieves correlated documents.")
+    ui.page_header(
+        "Federated query",
+        "Ask about a vehicle in plain English. The gateway understands the question, sends subqueries only to the "
+        "relevant databases, runs them in parallel, accumulates foreign-key context, retrieves correlated documents and "
+        "integrates everything into one sourced answer.", eyebrow="Federated querying")
 
-    c1, c2 = st.columns([3, 1])
-    with c2:
-        example = st.selectbox("Examples", ["(choose)"] + EXAMPLES)
-    default_q = st.session_state.get("p3_query", EXAMPLES[0])
-    if example != "(choose)":
-        default_q = example
-    with c1:
-        query = st.text_area("Natural-language query", value=default_q, height=80)
+    llm_off = _llm_disabled()
+    autorun = st.session_state.pop("p3_autorun", False)
+    if autorun:
+        st.session_state.p3_question = st.session_state.get("p3_query", EXAMPLES[0])
+        st.session_state.p3_example_pill = None
+    if "p3_question" not in st.session_state:
+        st.session_state.p3_question = st.session_state.get("p3_query", EXAMPLES[0])
 
-    with st.expander("📷 Registration image / explicit plate / observed context", expanded=False):
-        e1, e2 = st.columns(2)
-        with e1:
-            image = st.file_uploader("Upload plate image (OCR via gateway)", type=["jpg", "jpeg", "png"], key="p3_img")
-            if image is not None and st.button("Run OCR on image"):
-                try:
-                    resp = httpx.post(f"{gateway()}/api/ocr", files={"file": (image.name, image.getvalue(), image.type)}, timeout=120)
-                    resp.raise_for_status()
-                    ocr = resp.json()
-                    st.session_state.p3_ocr = ocr
-                    if ocr.get("normalized_plate"):
-                        st.session_state.p3_plate = ocr["normalized_plate"]
-                except Exception as exc:
-                    st.error(f"OCR failed: {exc}")
-            ocr = st.session_state.get("p3_ocr")
-            if ocr:
-                st.write(f"OCR text `{ocr.get('raw_text')}` → plate **{ocr.get('normalized_plate') or '-'}** "
-                         f"(confidence {ocr.get('confidence')})")
-                if ocr.get("ocr_variants"):
-                    st.caption("OCR confusion variants: " + ", ".join(ocr["ocr_variants"][:8]))
-                if ocr.get("message"):
-                    st.warning(ocr["message"])
-        with e2:
-            plate = st.text_input("Explicit / OCR plate (overrides plate in text)", value=st.session_state.get("p3_plate", ""))
-            ctx_cols = st.columns(2)
-            make = ctx_cols[0].text_input("Observed make", key="p3_make")
-            model = ctx_cols[1].text_input("Observed model", key="p3_model")
-            colour = ctx_cols[0].text_input("Observed colour", key="p3_colour")
-            state = ctx_cols[1].text_input("Observed state", key="p3_state")
-    o1, o2, o3 = st.columns([1, 1, 2])
-    include_docs = o1.checkbox("Retrieve documents", value=True)
-    top_k = o2.number_input("Top-k documents", 1, 15, 6)
-    if o3.button("🚀 Run federated query", type="primary", width="stretch"):
+    def _use_example():
+        if st.session_state.get("p3_example_pill"):
+            st.session_state.p3_question = st.session_state.p3_example_pill
+
+    with st.container(border=True):
+        st.pills("Examples", EXAMPLES, selection_mode="single", key="p3_example_pill", on_change=_use_example)
+        query = st.text_area("Question", key="p3_question", height=78,
+                             placeholder="e.g. Is GJ01AB7777 insured, stolen or scrapped?")
+
+        with st.expander("Plate image, explicit plate and observed vehicle details", expanded=False):
+            e1, e2 = st.columns(2)
+            with e1:
+                if config.DEMO_MODE:
+                    ui.demo_notice("Image OCR", "EasyOCR needs PyTorch (about 2 GB), which does not fit the free hosting "
+                                                "tier; it runs in the local installation. Type the plate on the right "
+                                                "instead - it goes through the same normalisation and matching.")
+                    image = None
+                else:
+                    image = st.file_uploader("Plate image (OCR through the gateway)", type=["jpg", "jpeg", "png"],
+                                             key="p3_img")
+                if image is not None and st.button("Read plate from image"):
+                    try:
+                        resp = httpx.post(f"{gateway()}/api/ocr", files={"file": (image.name, image.getvalue(), image.type)},
+                                          timeout=120)
+                        resp.raise_for_status()
+                        ocr = resp.json()
+                        st.session_state.p3_ocr = ocr
+                        if ocr.get("normalized_plate"):
+                            st.session_state.p3_plate = ocr["normalized_plate"]
+                    except Exception as exc:
+                        st.error(f"OCR failed: {exc}")
+                ocr = st.session_state.get("p3_ocr")
+                if ocr:
+                    st.write(f"OCR text `{ocr.get('raw_text')}` → plate **{ocr.get('normalized_plate') or '-'}** "
+                             f"(confidence {ocr.get('confidence')})")
+                    if ocr.get("ocr_variants"):
+                        st.caption("OCR confusion variants: " + ", ".join(ocr["ocr_variants"][:8]))
+                    if ocr.get("message"):
+                        st.warning(ocr["message"])
+            with e2:
+                plate = st.text_input("Explicit plate (overrides the plate in the question)",
+                                      value=st.session_state.get("p3_plate", ""))
+                ctx_cols = st.columns(2)
+                make = ctx_cols[0].text_input("Observed make", key="p3_make")
+                model = ctx_cols[1].text_input("Observed model", key="p3_model")
+                colour = ctx_cols[0].text_input("Observed colour", key="p3_colour")
+                state = ctx_cols[1].text_input("Observed state", key="p3_state")
+
+        o1, o2, o3, o4 = st.columns([1.1, 0.9, 1.3, 1.5], vertical_alignment="center")
+        include_docs = o1.toggle("Retrieve documents", value=True)
+        top_k = o2.number_input("Top-k documents", 1, 15, 6, help="Number of documents to retrieve")
+        if llm_off:
+            use_llm = o3.toggle("LLM understanding", value=False, disabled=True,
+                                help="The local Ollama model is not enabled here; the rule-based parser reads the "
+                                     "question and the rest of the pipeline is identical.")
+        else:
+            use_llm = o3.toggle("LLM understanding", value=st.session_state.get("p3_use_llm", True),
+                                help="A local Ollama model reads the question; the rule-based parser is used if it is "
+                                     "unavailable or returns invalid output.")
+            st.session_state.p3_use_llm = use_llm
+        run = o4.button("Run federated query", type="primary", width="stretch", icon=":material/play_arrow:")
+
+    if run or autorun:
         st.session_state.p3_query = query
         payload = {"query": query, "plate": plate or None,
                    "plate_source": "ocr" if plate and plate == (st.session_state.get("p3_ocr") or {}).get("normalized_plate") else None,
                    "make": make or None, "model": model or None, "colour": colour or None, "state": state or None,
-                   "include_documents": include_docs, "top_k_documents": int(top_k)}
-        with st.spinner("Federating subqueries..."):
+                   "include_documents": include_docs, "top_k_documents": int(top_k), "use_llm": use_llm}
+        with st.spinner("Understanding the question and federating subqueries..."):
             try:
-                st.session_state.p3_result = _post("/api/federated-query", payload)
+                st.session_state.p3_result = _post("/api/federated-query", payload, timeout=120)
             except Exception as exc:
-                st.error(f"Gateway request failed ({gateway()}): {exc}. Is `start_node.py machine-1` (or `all`) running?")
+                st.error(f"Gateway request failed ({gateway()}): {exc}. Is the gateway running?")
                 return
 
     result = st.session_state.get("p3_result")
     if not result:
-        st.info("Enter a query and press **Run federated query**.")
+        ui.note("Pick an example or type a question, then press <b>Run federated query</b>.")
         return
-    st.markdown("### Execution pipeline")
+    oq = result["understanding"]["original_query"] or "(explicit plate)"
+    ui.section("Execution pipeline", f"Total {result['total_ms']} ms · “{oq[:140]}”")
     _pipeline_strip(result)
     if result.get("error"):
         st.error(result["error"])
@@ -182,26 +222,54 @@ def render_federated_query() -> None:
     avail = result["context"]["service_availability"]
     down = [v["label"] for v in avail.values() if v["status"] not in ("ok",)]
     if down:
-        st.warning("⚠️ Unavailable services (partial results): " + ", ".join(down))
+        ui.note("<b>Partial result.</b> Unavailable: " + escape(", ".join(down)) +
+                ". Their checks are reported as missing, never as clear.", tone="amber")
 
     answer = result["answer"]
-    st.markdown(f"### 🧾 Final answer — {answer['headline']}")
-    for s in answer["statements"]:
-        icon, label = KIND_STYLE.get(s["kind"], ("•", s["kind"]))
-        src = f"  \n<small>sources: {', '.join(s['sources'])}</small>" if s["sources"] else ""
-        st.markdown(f"{icon} **{label}:** {s['text']}{src}", unsafe_allow_html=True)
-    st.caption(f"Total {result['total_ms']} ms · decision support only, not an official verification.")
+    trust = result.get("trust") or {}
+    t_col, a_col = st.columns([1, 2.7])
+    with t_col:
+        render_trust_card(trust, compact=True)
+    with a_col:
+        rows = []
+        for s in answer["statements"]:
+            tone, label = KIND_STYLE.get(s["kind"], ("gray", s["kind"]))
+            src = f"<div class='vt-stmt-src'>Sources: {escape(', '.join(s['sources']))}</div>" if s["sources"] else ""
+            rows.append(f"<div class='vt-stmt'><div>{ui.pill(label, tone)}</div>"
+                        f"<div><div class='vt-stmt-text'>{escape(s['text'])}</div>{src}</div></div>")
+        st.markdown(f"<div class='vt-eyebrow' style='margin-top:2px'>Answer</div>"
+                    f"<div style='font-size:1.12rem;font-weight:650;margin:0 0 8px 0;color:#0f172a'>"
+                    f"{escape(answer['headline'])}</div><div class='vt-answer'>{''.join(rows)}</div>",
+                    unsafe_allow_html=True)
+        st.caption("Decision support only, not an official verification.")
+    if trust.get("score") is not None:
+        with st.expander(f"How the Trust Score was computed ({len(trust.get('deductions', []))} deduction(s))"):
+            _trust_deductions(trust)
 
-    tabs = st.tabs(["1 Understanding & decomposition", "2 Federated execution", "3 Database results & FK-PK",
-                    "4 Accumulated context", "5 Documents", "6 Integration, conflicts & cleansing", "Raw JSON"])
+    st.write("")
+    tabs = st.tabs(["Understanding & decomposition", "Federated execution", "Database results & FK-PK",
+                    "Accumulated context", "Documents", "Conflicts & cleansing", "Raw JSON"])
     u, d = result["understanding"], result["decomposition"]
     with tabs[0]:
+        llm = u.get("llm") or {}
+        method = u.get("understanding_method", "rules")
+        if llm.get("used"):
+            st.success(f"Understood by **{method}** in {llm.get('latency_ms')} ms — {llm.get('reasoning', '')}")
+            st.caption(f"Rule-based parser would have chosen: {', '.join(llm.get('rules_intents') or [])}"
+                       + (f" · Rejected (not in the question): {'; '.join(llm['rejected'])}" if llm.get("rejected") else ""))
+        else:
+            st.info(f"Understood by **{method}**" + (f" — {llm.get('fallback_reason')}" if llm.get("fallback_reason") else ""))
+        st.markdown(f"<div style='margin:4px 0 12px 0'><span class='vt-label'>Plate</span>&nbsp; "
+                    f"<code>{escape(str(u.get('registration_number') or '-'))}</code> &nbsp;&nbsp;"
+                    f"<span class='vt-label'>Intents</span>&nbsp; "
+                    + " ".join(ui.pill(x, "blue") for x in (u.get("intent_labels") or u.get("intents") or []))
+                    + "</div>", unsafe_allow_html=True)
         a, b = st.columns(2)
         with a:
             st.markdown("**Query understanding**")
             st.json({k: u[k] for k in ("registration_number", "plate_source", "plate_text_span", "plate_syntax_valid",
                                        "plate_syntax_corrected", "intents", "intent_labels", "attributes",
-                                       "required_information", "ocr_variants")})
+                                       "required_information", "ocr_variants")}, expanded=1)
         with b:
             st.markdown("**Decomposition — subqueries**")
             st.dataframe(pd.DataFrame([{"database": config.SERVICES[s["service"]]["label"], "wave": s["wave"],
@@ -288,7 +356,7 @@ def render_federated_query() -> None:
                          column_config={k: st.column_config.ProgressColumn(k, min_value=0.0, max_value=1.0, format="%.2f")
                                         for k in ("score", "plate", "identifiers", "bm25", "doc_type", "date", "context")})
         for x in docs.get("documents", []) + docs.get("general_documents", []):
-            with st.expander(f"📄 {x['doc_id']} · {x['title']} · {x['document_type']} · score {x['relevance_score']} · {x['scope']}"):
+            with st.expander(f"{x['doc_id']} · {x['title']} · {x['document_type']} · score {x['relevance_score']} · {x['scope']}"):
                 st.markdown("**Why relevant:** " + " · ".join(x["reasons"]))
                 st.markdown(f"**Best matching chunk:** {x['snippet']}")
                 checks = [c for c in x["evidence_checks"]]
@@ -311,7 +379,7 @@ def render_federated_query() -> None:
             st.caption(risk["recommended_action"])
         st.markdown(f"**Conflicts ({len(integ['conflicts'])})** — none are auto-resolved")
         for c in integ["conflicts"]:
-            with st.expander(f"⚠️ [{c['severity']}] {c['type']}: {c['description']}"):
+            with st.expander(f"[{c['severity']}] {c['type']}: {c['description']}"):
                 if c.get("explanation"):
                     st.info(c["explanation"])
                 st.dataframe(pd.DataFrame(c["evidence"]), width="stretch", hide_index=True)
@@ -340,9 +408,114 @@ def render_federated_query() -> None:
         st.json(result, expanded=False)
 
 
+BAND_STYLE = {"HIGH_TRUST": ("green", "#0f7b4f"), "REVIEW": ("amber", "#b86e00"), "HIGH_RISK": ("red", "#b42323"),
+              "NO_MATCH": ("gray", "#64748b")}
+
+
+def _trust_deductions(trust: Dict[str, Any]) -> None:
+    if trust.get("deductions"):
+        st.dataframe(pd.DataFrame([{"points": -d["points"], "reason": d["reason"], "source": d["source"]}
+                                   for d in trust["deductions"]]), width="stretch", hide_index=True)
+    else:
+        st.write("No deductions: every check that was performed came back clean.")
+    st.caption(trust.get("note", "") + " Score = 100 minus the listed deductions (rules in federation.TRUST_RULES).")
+
+
+def render_trust_card(trust: Dict[str, Any], compact: bool = False) -> None:
+    """Explainable Vehicle Trust Score: 100 minus listed deductions, with the checks it covers."""
+    if not trust or trust.get("score") is None:
+        return
+    tone, color = BAND_STYLE.get(trust["band"], ("gray", "#64748b"))
+    score = int(trust["score"])
+    n = len(trust.get("deductions") or [])
+    st.markdown(
+        f"<div class='vt-trust'><div class='vt-trust-label'>Vehicle Trust Score</div>"
+        f"<div class='vt-trust-score' style='color:{color}'>{score}</div>"
+        f"<div class='vt-trust-bar'><div style='width:{max(2, min(100, score))}%;background:{color}'></div></div>"
+        f"{ui.pill(trust['label'], tone)}"
+        f"<div class='vt-stmt-src' style='margin-top:10px'>{n} deduction(s) · 100 minus listed risks</div></div>",
+        unsafe_allow_html=True)
+    if not compact:
+        _trust_deductions(trust)
+
+
+def render_fleet_scan() -> None:
+    """Runs the full-history federated query for every vehicle in the registry and summarises data quality."""
+    ui.page_header("Fleet data-quality scan",
+                   "Runs the complete-history federated query for every registered vehicle - all five databases, "
+                   "wave 1 and the audit wave - and ranks the fleet by Trust Score, conflicts and statuses. "
+                   "Documents and the LLM are skipped for speed.", eyebrow="Federated querying")
+    if st.button("Scan all vehicles", type="primary", icon=":material/play_arrow:"):
+        try:
+            vehicles = _get("/api/services/vehicle_registry/records")
+        except Exception as exc:
+            st.error(f"Vehicle Registry unavailable through the gateway: {exc}")
+            return
+        rows, started = [], time.time()
+        bar = st.progress(0.0, text="Scanning...")
+        for i, v in enumerate(vehicles):
+            plate = v["registration_number"]
+            try:
+                r = _post("/api/federated-query", {"query": f"Check the complete history of {plate}",
+                                                   "include_documents": False, "use_llm": False}, timeout=30)
+                t, attrs, risk = r.get("trust") or {}, r["context"]["attributes"], r["integration"]["insurance_risk"]
+                rows.append({"plate": plate, "vehicle": f"{v.get('make', '')} {v.get('model', '')}".strip(),
+                             "trust score": t.get("score"), "band": t.get("label"),
+                             "conflicts": len(r["integration"]["conflicts"]),
+                             "conflict types": ", ".join(sorted({c["type"] for c in r["integration"]["conflicts"]})) or "-",
+                             "insurance": risk.get("status"),
+                             "theft": (attrs.get("theft_status") or {}).get("value", "not recorded"),
+                             "scrapping": (attrs.get("scrapping_status") or {}).get("value", "not recorded"),
+                             "RC": (attrs.get("rc_status") or {}).get("value", "-"),
+                             "unavailable": ", ".join(k for k, s in r["context"]["service_availability"].items()
+                                                      if s["status"] != "ok") or "-"})
+            except Exception as exc:
+                rows.append({"plate": plate, "vehicle": "", "trust score": None, "band": f"error: {exc}"})
+            bar.progress((i + 1) / max(1, len(vehicles)), text=f"Scanned {i + 1}/{len(vehicles)}: {plate}")
+        st.session_state.fleet_scan = {"rows": rows, "seconds": round(time.time() - started, 1)}
+    scan = st.session_state.get("fleet_scan")
+    if not scan:
+        ui.note("Press <b>Scan all vehicles</b>. Each vehicle triggers one federated query; the whole fleet takes "
+                "a few seconds.")
+        return
+    df = pd.DataFrame(scan["rows"])
+    scored = df[df["trust score"].notna()]
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric("Vehicles scanned", len(df))
+    m2.metric("Average trust", f"{scored['trust score'].mean():.0f}" if len(scored) else "-")
+    m3.metric("High risk", int((scored["band"] == "High risk").sum()) if len(scored) else 0)
+    m4.metric("With conflicts", int((df.get("conflicts", 0) > 0).sum()) if "conflicts" in df else 0)
+    m5.metric("Scan time", f"{scan['seconds']} s")
+    if len(scored):
+        import altair as alt
+        bands = ["High trust", "Review advised", "High risk"]
+        chart = alt.Chart(scored).mark_bar(cornerRadiusEnd=3, height=14).encode(
+            x=alt.X("trust score:Q", scale=alt.Scale(domain=[0, 100]), title="Vehicle Trust Score"),
+            y=alt.Y("plate:N", sort="x", title=None, axis=alt.Axis(labelOverlap=False, labelFontSize=11)),
+            color=alt.Color("band:N", scale=alt.Scale(domain=bands, range=["#1baf7a", "#eda100", "#d03b3b"]),
+                            legend=alt.Legend(title=None, orient="top")),
+            tooltip=["plate", "vehicle", "trust score", "band", "conflicts", "insurance", "theft", "scrapping"],
+        ).properties(height=22 * len(scored) + 50)
+        st.altair_chart(chart, width="stretch")
+    st.dataframe(df.sort_values("trust score", na_position="first"), width="stretch", hide_index=True,
+                 column_config={"trust score": st.column_config.ProgressColumn("trust score", min_value=0, max_value=100,
+                                                                               format="%d")})
+    conflict_counts = {}
+    for types in df.get("conflict types", []):
+        for t in str(types).split(", "):
+            if t and t != "-":
+                conflict_counts[t] = conflict_counts.get(t, 0) + 1
+    if conflict_counts:
+        ui.section("Conflict types across the fleet")
+        st.dataframe(pd.DataFrame(sorted(conflict_counts.items(), key=lambda x: -x[1]), columns=["conflict type", "vehicles"]),
+                     width="stretch", hide_index=True)
+
+
 def render_schema_explorer() -> None:
-    st.header("🧬 Database Schemas & FK-PK Relationships")
-    st.caption("Read through each service's REST API (/schema, /tables, /integrity) — works across laptops.")
+    ui.page_header("Schemas & FK-PK relationships",
+                   "Live schema of each database service, read over its REST API (/schema, /tables, /integrity): "
+                   "tables, primary and foreign keys, an orphan-row integrity check and the rows themselves.",
+                   eyebrow="Data")
     keys = config.ALL_SERVICE_KEYS
     tabs = st.tabs([config.SERVICES[k]["label"] for k in keys])
     for key, tab in zip(keys, tabs):
@@ -359,9 +532,10 @@ def render_schema_explorer() -> None:
             m3.metric("FK enforcement", "ON" if integrity["foreign_keys_enabled"] else "OFF")
             m4.metric("Orphan rows", len(integrity["violations"]))
             st.caption(f"Database file on its own machine: `{schema['database']}` · views: {', '.join(schema['views']) or 'none'}")
-            dot = ['digraph S { rankdir=LR; node [shape=record, fontsize=10];']
+            dot = ['digraph S { rankdir=LR; bgcolor="transparent"; node [shape=record, fontsize=10, fontname="Helvetica", '
+                   'style=filled, fillcolor="#ffffff", color="#9fb0c6"]; edge [color="#8a99ad", fontname="Helvetica"];']
             for t in schema["tables"]:
-                cols = "\\l".join(("🔑 " if c["primary_key"] else "") + c["name"] for c in t["columns"][:12])
+                cols = "\\l".join(("PK  " if c["primary_key"] else "") + c["name"] for c in t["columns"][:12])
                 dot.append(f'"{t["table"]}" [label="{{{t["table"]} ({t["row_count"]})|{cols}\\l}}"];')
                 for fk in t["foreign_keys"]:
                     dot.append(f'"{t["table"]}" -> "{fk["references_table"]}" [label="{fk["column"]}", fontsize=8];')
@@ -381,7 +555,10 @@ def render_schema_explorer() -> None:
 
 
 def render_documents() -> None:
-    st.header("📚 Unstructured Document Repository")
+    ui.page_header("Document repository",
+                   "Synthetic police reports, insurer letters, RTO notices and certificates (TXT, PDF, Markdown). Each "
+                   "is cleaned, its metadata extracted (plates incl. OCR-noisy ones, identifiers, dates, type) and "
+                   "indexed as overlapping chunks with BM25.", eyebrow="Unstructured data")
     try:
         data = _get("/api/documents")
     except Exception as exc:
@@ -392,7 +569,8 @@ def render_documents() -> None:
     c1.metric("Documents", stats["documents"])
     c2.metric("Chunks indexed", stats["chunks"])
     c3.metric("Vocabulary", stats["vocabulary"])
-    c4.metric("Formats", ", ".join(f"{k}:{v}" for k, v in stats["formats"].items()))
+    c4.metric("Formats", " · ".join(k.upper() for k in stats["formats"]),
+              help=", ".join(f"{k}: {v}" for k, v in stats["formats"].items()))
     st.caption("All documents are SYNTHETIC demonstration data (marked in each file). Index: BM25 over overlapping "
                f"word chunks + metadata. Indexed at {stats['indexed_at']}.")
     if st.button("Re-index documents folder"):

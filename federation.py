@@ -2,7 +2,8 @@
 
 Pipeline (each stage is timed and returned so the UI can show it):
 
-  1 understanding      query_engine.understand_query
+  1 understanding      llm_understanding.understand_with_llm (local Ollama, optional)
+                       -> falls back to query_engine.understand_query (rules)
   2 decomposition      query_engine.decompose_query (only relevant databases)
   3 wave 1             parallel async POST /federated/query to the selected services;
                        each service fuzzy-matches locally and expands its own FK-PK graph
@@ -646,13 +647,106 @@ def compose_answer(understanding, ctx, integ, docs, missing) -> Dict[str, Any]:
 
 
 # =============================================================================
+# Vehicle Trust Score (explainable 0-100 summary of the integrated evidence)
+# =============================================================================
+TRUST_RULES = {
+    "theft_status": {"STOLEN": 40, "RECOVERED": 5},
+    "scrapping_status": {"SCRAPPED": 40, "PENDING_SCRAP": 20},
+    "insurance": {"EXPIRED": 25, "NOT_FOUND": 25, "CONFLICTING": 15, "FUTURE_POLICY": 10, "UNVERIFIED": 10},
+    "rc_status": {"SUSPENDED": 15, "CANCELLED": 20, "EXPIRED": 10},
+    "conflict": {"HIGH": 10, "MEDIUM": 5, "LOW": 2},
+    "confidence": {"MEDIUM": 5, "LOW": 15},
+}
+CONFLICT_CAP, MISSING_PER_ITEM, MISSING_CAP = 30, 3, 15
+
+
+def compute_trust_score(ctx: Dict[str, Any], integ: Dict[str, Any], missing: List[Dict[str, str]]) -> Dict[str, Any]:
+    """Starts at 100 and deducts points for each risk found in the integrated result.
+
+    Deterministic and explainable: every deduction names its reason and source record, and the
+    score lists which checks were actually performed (a check that was not queried or whose
+    service was down is reported as not checked - it never counts as 'clean')."""
+    entity = ctx.get("resolved_entity") or {}
+    if not entity.get("registration_number"):
+        return {"score": None, "band": "NO_MATCH", "label": "No matching vehicle", "deductions": [], "checks": {}}
+    sel, attrs, avail = ctx["selected"], ctx["attributes"], ctx["service_availability"]
+    deductions: List[Dict[str, Any]] = []
+
+    def deduct(points, reason, source):
+        deductions.append({"points": points, "reason": reason, "source": source})
+
+    def checked(svc):
+        return svc in avail and avail[svc]["status"] == "ok"
+
+    checks = {}
+    theft = (sel.get("theft_scrapping") or [None])[0]
+    if checked("theft_scrapping") and theft:
+        checks["theft & scrapping"] = "checked"
+        rec, ref = theft["record"], f"theft_scrapping:theft_scrapping_records#{theft['record_id']}"
+        for field in ("theft_status", "scrapping_status"):
+            pts = TRUST_RULES[field].get(str(rec.get(field, "")).upper())
+            if pts:
+                deduct(pts, f"{field.replace('_', ' ')} is {rec[field]}", ref)
+    else:
+        checks["theft & scrapping"] = "not checked" if "theft_scrapping" not in avail else "unavailable / not recorded"
+
+    risk = integ.get("insurance_risk") or {}
+    if risk.get("status") in (None, "NOT_QUERIED"):
+        checks["insurance"] = "not checked"
+    else:
+        checks["insurance"] = "checked" if checked("insurance_records") else "unavailable"
+        pts = TRUST_RULES["insurance"].get(risk["status"])
+        if pts:
+            deduct(pts, f"insurance {risk['status']} ({risk.get('status_label', '')})", "insurance_records")
+
+    rc = attrs.get("rc_status")
+    if rc:
+        checks["registration certificate"] = "checked"
+        pts = TRUST_RULES["rc_status"].get(str(rc["value"]).upper())
+        if pts:
+            deduct(pts, f"RC status is {rc['value']}", f"{rc['source']}:{rc['record']}")
+    else:
+        checks["registration certificate"] = "not checked"
+
+    conflict_pts = 0
+    for c in integ.get("conflicts", []):
+        pts = TRUST_RULES["conflict"].get(c.get("severity"), 0)
+        pts = min(pts, CONFLICT_CAP - conflict_pts)
+        if pts > 0:
+            conflict_pts += pts
+            deduct(pts, f"conflict [{c['severity']}] {c['type']}: {c['description']}",
+                   ", ".join(sorted({e['source'] for e in c['evidence']})))
+    checks["cross-source consistency"] = f"{len(integ.get('conflicts', []))} conflict(s)"
+
+    if missing:
+        deduct(min(MISSING_CAP, MISSING_PER_ITEM * len(missing)),
+               f"{len(missing)} required item(s) missing: " + ", ".join(m["item"] for m in missing[:4]), "gateway")
+    pts = TRUST_RULES["confidence"].get(entity.get("confidence"))
+    if pts:
+        deduct(pts, f"vehicle match confidence {entity['confidence']} ({entity.get('method', '')})", "entity resolution")
+
+    score = max(0, 100 - sum(d["points"] for d in deductions))
+    band = "HIGH_TRUST" if score >= 80 else "REVIEW" if score >= 50 else "HIGH_RISK"
+    unavailable = [k for k, v in checks.items() if v.startswith("unavailable")]
+    if unavailable and band == "HIGH_TRUST":
+        band = "REVIEW"  # a source that could not be reached can never produce the top band
+    label = {"HIGH_TRUST": "High trust", "REVIEW": "Review advised", "HIGH_RISK": "High risk"}[band]
+    not_checked = [k for k, v in checks.items() if v.startswith("not checked") or v.startswith("unavailable")]
+    return {"score": score, "band": band, "label": label, "deductions": deductions, "checks": checks,
+            "partial": bool(not_checked),
+            "note": ("Score covers only the checks performed: " + ", ".join(k for k in checks if k not in not_checked)
+                     + (f". Not checked: {', '.join(not_checked)}." if not_checked else "."))}
+
+
+# =============================================================================
 # Orchestrator
 # =============================================================================
 async def run_federated_query(query: str, plate: Optional[str] = None, context: Optional[Dict[str, Any]] = None,
                               plate_source: Optional[str] = None, *, urls: Optional[Dict[str, str]] = None,
                               timeout: Optional[float] = None, transport: Optional[httpx.AsyncBaseTransport] = None,
                               include_documents: bool = True, top_k_documents: int = 6, store=None,
-                              today: Optional[datetime.date] = None) -> Dict[str, Any]:
+                              today: Optional[datetime.date] = None, use_llm: Optional[bool] = None,
+                              llm_transport: Optional[httpx.AsyncBaseTransport] = None) -> Dict[str, Any]:
     urls = urls or config.service_urls()
     timeout = timeout or config.FEDERATION_TIMEOUT
     stages: List[Dict[str, Any]] = []
@@ -662,8 +756,10 @@ async def run_federated_query(query: str, plate: Optional[str] = None, context: 
         stages.append({"stage": name, "ms": round((time.perf_counter() - started) * 1000, 1), "detail": detail})
 
     t = time.perf_counter()
-    understanding = understand_query(query, plate, context, plate_source)
-    stage("Query Understanding", t, f"plate={understanding['registration_number'] or '-'}; intents={', '.join(understanding['intents'])}")
+    from llm_understanding import understand_with_llm
+    understanding = await understand_with_llm(query, plate, context, plate_source, use_llm=use_llm, transport=llm_transport)
+    stage("Query Understanding", t, f"[{understanding['understanding_method']}] plate={understanding['registration_number'] or '-'}; "
+          f"intents={', '.join(understanding['intents'])}")
     t = time.perf_counter()
     decomposition = decompose_query(understanding)
     stage("Query Decomposition", t, f"{len(decomposition['subqueries'])} subqueries: {', '.join(decomposition['selected_services'])}")
@@ -760,9 +856,10 @@ async def run_federated_query(query: str, plate: Optional[str] = None, context: 
     t = time.perf_counter()
     missing = missing_information(understanding, ctx, integ)
     answer = compose_answer(understanding, ctx, integ, docs, missing)
+    trust = compute_trust_score(ctx, integ, missing)
     stage("Structured + Unstructured Integration → Final Answer", t, answer["headline"])
 
     ctx["database_results"] = ctx.pop("selected")  # per-service matched records with related rows + FK paths
     return {**base, "context": ctx, "integration": integ, "documents": docs, "missing_information": missing,
-            "answer": answer, "total_ms": round((time.perf_counter() - t_all) * 1000, 1),
+            "answer": answer, "trust": trust, "total_ms": round((time.perf_counter() - t_all) * 1000, 1),
             "executed_at": datetime.datetime.now(datetime.timezone.utc).isoformat()}

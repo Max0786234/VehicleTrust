@@ -12,6 +12,7 @@ Other commands
   python start_node.py check                  health of every configured service URL (from .env)
   python start_node.py configure machine-1 --machine2-ip 192.168.1.50   write .env for Laptop 1
   python start_node.py package machine-2      clean project copy + zip for the teammate (dist/)
+  python start_node.py package space          folder for the hosted demo (Hugging Face Space, Docker)
   python start_node.py registry|insurance|registration|theft|audit|frontend   one component only
 
 Each machine only initializes and opens the SQLite files it owns; everything else is HTTP.
@@ -43,6 +44,15 @@ OPTIONAL_DEPENDENCIES = {"cv2": "OpenCV (image preprocessing for OCR)", "easyocr
 PACKAGE_EXCLUDE_DIRS = {".venv", "venv", "linux_venv", "__pycache__", ".pytest_cache", "backups", "dist", ".git",
                         ".idea", ".vscode"}
 PACKAGE_EXCLUDE_EXT = {".db", ".db-journal", ".pyc", ".log", ".zip"}
+
+
+def local_excludes() -> set:
+    """File names listed in the repository's private exclude file (.git/info/exclude) are never packaged."""
+    path = os.path.join(BASE_DIR, ".git", "info", "exclude")
+    if not os.path.exists(path):
+        return set()
+    with open(path, encoding="utf-8") as fh:
+        return {ln.strip() for ln in fh if ln.strip() and not ln.startswith("#") and not ln.strip().endswith("/")}
 
 
 def banner(text: str) -> None:
@@ -208,6 +218,7 @@ def run_group(group: str, host: str, with_frontend: bool, skip_checks: bool) -> 
                 print(f"   {config.SERVICES[key]['label']:<24} {where:<6} {url:<28} {state}")
             if not all(http_ok(f"{u}/health", 1.0)[0] for u in urls.values()):
                 print("   -> Starting anyway: queries will report the unreachable services as unavailable (partial results).")
+            print_llm_status()
             print(f"\n[Start] API Gateway               port {config.GATEWAY_PORT}")
             gw = start_uvicorn("gateway", config.GATEWAY_PORT, host)
             processes.append(("Gateway", gw))
@@ -255,6 +266,7 @@ def check_services() -> int:
     gw = config.gateway_url()
     ok, _ = http_ok(f"{gw}/api/topology", 3.0)
     print(f"  {'OK  ' if ok else 'n/a '}  {'API Gateway':<24} {gw:<30} {'running' if ok else 'not running on this machine'}")
+    print_llm_status()
     if local_down:
         print(f"\nNot running on THIS machine: {', '.join(local_down)} -> start them with "
               "'python start_node.py machine-1' (or 'all' on a single laptop).")
@@ -263,6 +275,22 @@ def check_services() -> int:
               "there? Same Wi-Fi? Firewall rule for ports 8101-8103? Correct IP in .env "
               "('python start_node.py configure machine-1 --machine2-ip <IP>')?")
     return 1 if failures else 0
+
+
+def print_llm_status() -> None:
+    """Optional local LLM (Ollama) used for query understanding; the rule-based parser is the fallback."""
+    import asyncio
+    from llm_understanding import ollama_status
+    st = asyncio.run(ollama_status())
+    url = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434")
+    if st["mode"] == "off":
+        print(f"  off   {'LLM (Ollama)':<24} {'LLM_UNDERSTANDING=off':<30} rule-based understanding only")
+    elif not st["reachable"]:
+        print(f"  n/a   {'LLM (Ollama)':<24} {url:<30} not running -> rule-based understanding (start Ollama to enable)")
+    elif not st["model_installed"]:
+        print(f"  WARN  {'LLM (Ollama)':<24} {st['model']:<30} model not downloaded: run 'ollama pull {st['model']}'")
+    else:
+        print(f"  OK    {'LLM (Ollama)':<24} {st['model']:<30} ready (query understanding)")
 
 
 def env_text(group: str, machine2_ip: str = "", machine1_ip: str = "") -> str:
@@ -293,6 +321,9 @@ def env_text(group: str, machine2_ip: str = "", machine1_ip: str = "") -> str:
                   "REGISTRY_API_URL=http://127.0.0.1:8101", "INSURANCE_API_URL=http://127.0.0.1:8102",
                   "REGISTRATION_API_URL=http://127.0.0.1:8103", "THEFT_API_URL=http://127.0.0.1:8104",
                   "AUDIT_API_URL=http://127.0.0.1:8105"]
+    if group in ("machine-1", "all"):
+        lines += ["", "# Optional local LLM for query understanding (rules are used if Ollama is not running)",
+                  "LLM_UNDERSTANDING=auto", "OLLAMA_URL=http://127.0.0.1:11434", "OLLAMA_MODEL=llama3.2"]
     lines += ["", "# Optional: FEDERATION_TIMEOUT=4.0  (seconds per remote subquery)"]
     return "\n".join(lines) + "\n"
 
@@ -315,24 +346,32 @@ def configure(group: str, machine2_ip: str, machine1_ip: str) -> None:
 
 
 def package(group: str, out_dir: str, with_data: bool, machine2_ip: str) -> str:
-    if group not in ("machine-1", "machine-2", "all"):
-        print("[Error] package expects machine-1, machine-2 or all")
+    if group not in ("machine-1", "machine-2", "all", "space"):
+        print("[Error] package expects machine-1, machine-2, all or space")
         sys.exit(1)
     dest_root = os.path.abspath(out_dir or os.path.join(BASE_DIR, "dist"))
     dest = os.path.join(dest_root, f"VehicleTrust-{group}")
     if os.path.exists(dest):
         shutil.rmtree(dest)
+    skip_names = {".env", ".env.bak"} | local_excludes()
     for dirpath, dirnames, filenames in os.walk(BASE_DIR):
-        dirnames[:] = [d for d in dirnames if d not in PACKAGE_EXCLUDE_DIRS and not d.startswith(".")]
+        dirnames[:] = [d for d in dirnames if d not in PACKAGE_EXCLUDE_DIRS and (d == ".streamlit" or not d.startswith("."))]
         if os.path.abspath(dirpath).startswith(dest_root):
             continue
         rel = os.path.relpath(dirpath, BASE_DIR)
         for name in filenames:
-            if os.path.splitext(name)[1].lower() in PACKAGE_EXCLUDE_EXT or name in (".env", ".env.bak"):
+            if os.path.splitext(name)[1].lower() in PACKAGE_EXCLUDE_EXT or name in skip_names:
                 continue
+            if group == "space" and rel == "docs" and name.lower().endswith(".pdf"):
+                continue  # personal study guide; not part of the public demo
             target_dir = os.path.join(dest, rel)
             os.makedirs(target_dir, exist_ok=True)
             shutil.copy2(os.path.join(dirpath, name), os.path.join(target_dir, name))
+    if group == "space":  # Hugging Face Space (Docker SDK): the Space card replaces the GitHub README
+        shutil.copy2(os.path.join(BASE_DIR, "deploy", "huggingface", "README.md"), os.path.join(dest, "README.md"))
+        print(f"[Package] space: folder {dest}")
+        print(f"[Package] upload it with:  hf upload <your-hf-username>/VehicleTrust \"{dest}\" . --repo-type=space")
+        return dest
     copied_dbs = []
     if with_data:
         for node in MACHINE_GROUPS[group]:

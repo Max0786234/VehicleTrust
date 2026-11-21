@@ -8,6 +8,6 @@ pandas>=2.2.0
 pytest>=8.0.0
 python-dotenv>=1.0.1
 rapidfuzz>=3.6.0
-streamlit>=1.46.0
+streamlit>=1.64.0
 pypdf>=4.0.0
 opencv-python-headless>=4.9.0

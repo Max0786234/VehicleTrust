@@ -55,6 +55,19 @@ def test_package_contains_code_but_only_the_machines_own_databases(tmp_path):
     assert "REGISTRY_API_URL=http://10.1.1.2:8101" in open(os.path.join(dest1, ".env"), encoding="utf-8").read()
 
 
+def test_space_package_is_a_docker_space_without_secrets_or_data(tmp_path):
+    dest = start_node.package("space", str(tmp_path), with_data=True, machine2_ip="")
+    files = {os.path.relpath(os.path.join(d, f), dest).replace("\\", "/") for d, _, fs in os.walk(dest) for f in fs}
+    readme = open(os.path.join(dest, "README.md"), encoding="utf-8").read()
+    assert readme.startswith("---") and "sdk: docker" in readme and "app_port: 7860" in readme
+    for needed in ["Dockerfile", "app.py", "ui_theme.py", ".streamlit/config.toml", "static/logo.svg", "requirements.txt"]:
+        assert needed in files
+    assert not [f for f in files if f.endswith(".db") or f == ".env" or
+                (f.startswith("docs/") and f.endswith(".pdf"))]
+    dockerfile = open(os.path.join(dest, "Dockerfile"), encoding="utf-8").read()
+    assert "VEHICLETRUST_DEMO=1" in dockerfile and "STREAMLIT_PORT=7860" in dockerfile
+
+
 def test_port_check_detects_busy_port():
     import socket
     s = socket.socket()

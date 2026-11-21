@@ -19,6 +19,7 @@ for _env, _name in [
     os.environ[_env] = os.path.join(TEST_DB_DIR, _name)
 # Ensure URL configuration is deterministic regardless of the developer's .env
 os.environ["VEHICLETRUST_KEEP_ENV"] = "1"  # do not let .env override the values set here
+os.environ["LLM_UNDERSTANDING"] = "off"    # tests are deterministic; LLM tests mock Ollama explicitly
 for _env in ["REGISTRY_API_URL", "INSURANCE_API_URL", "REGISTRATION_API_URL", "THEFT_API_URL", "AUDIT_API_URL",
              "MACHINE1_HOST", "MACHINE2_HOST"]:
     os.environ[_env] = ""
