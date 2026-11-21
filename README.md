@@ -1,6 +1,12 @@
 # VehicleTrust 🛡️
 ### Federated vehicle-record integration across independent databases
 
+[![Live demo](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://vehicletrust.streamlit.app/)
+
+**Live demo: [vehicletrust.streamlit.app](https://vehicletrust.streamlit.app/)**. Open *Overview* and click any
+example question to run the full federated pipeline. The first visit after a quiet period may take about a minute to
+wake the app.
+
 VehicleTrust answers questions such as *"Check the complete history of DL01AB1234"* or
 *"Is this vehicle insured, stolen or scrapped?"*. The information needed lives in **five independent
 databases** owned by different organisations and running on **two machines**. The system finds the
@@ -130,7 +136,7 @@ Firewall rules, troubleshooting and the optional dashboard on machine 2 are desc
 
 ## Hosted demo
 
-The online demo runs on **Streamlit Community Cloud** from this repository with main file `streamlit_app.py`. That
+The online demo ([vehicletrust.streamlit.app](https://vehicletrust.streamlit.app/)) runs on **Streamlit Community Cloud** from this repository with main file `streamlit_app.py`. That
 file starts the five database services and the gateway as separate background processes on localhost; they still
 talk only over HTTP. It then renders the normal dashboard. Demo mode turns off plate OCR (EasyOCR/PyTorch is too
 large for the free tier) and the local LLM, and makes record editing read-only. Databases are seeded fresh whenever
