@@ -171,7 +171,7 @@ def page_overview():
         ("Independent databases", "5", "separate SQLite services"),
         ("Relational tables", "26", "linked by foreign keys"),
         ("Synthetic documents", "37", "TXT · PDF · Markdown"),
-        ("Automated tests", "141", "pytest, incl. multi-process"),
+        ("Automated tests", "142", "pytest, incl. multi-process"),
     ])
 
     c1, c2 = st.columns([1.5, 1], gap="large")
